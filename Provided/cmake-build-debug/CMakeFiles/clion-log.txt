@@ -1,1 +1,0 @@
-CMakeLists.txt not found in /Users/evyatarziv/Documents/Technion/Work/MTM/EX1/Provided Select CMakeLists.txt

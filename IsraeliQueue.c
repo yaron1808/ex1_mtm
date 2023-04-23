@@ -11,15 +11,34 @@
  * ISRAELI_QUEUE_ERROR: Indicates any error beyond the above.
  * */
 
-typedef struct {
-    int a;
+typedef struct node
+{
+    void* data;
+    struct node* next;
+
+}Node;
+
+typedef struct
+{
+//    int (*friendshipFunction)(void*, void*);
+    Node* head;
+    Node* last;
+    FriendshipFunction * friends;
+    ComparisonFunction compare;
+    int friendship_th;
+    int rivalry_th;
+
+
 }IsraeliQueue_t;
 
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
-IsraeliQueue IsraeliQueueCreate(FriendshipFunction *, ComparisonFunction, int, int);
+IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction comp, int friendship_th, int rivalry_th)
+{
+
+}
 
 /**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occured during
  * the execution of the function, NULL is returned.*/

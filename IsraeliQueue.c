@@ -53,10 +53,23 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
     return (IsraeliQueue)ptrIsraeliQueue;
 }
 
-/**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occured during
+/**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occurred during
  * the execution of the function, NULL is returned.*/
-//IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
+IsraeliQueue IsraeliQueueClone(IsraeliQueue queue)
+{
+    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
+    IsraeliQueue_t* clone = malloc(sizeof(IsraeliQueue_t));
+    if(clone!=NULL)
+    {
+        clone->rivalry_th = ptrQueue->rivalry_th;
+        clone->friendship_th = ptrQueue->friendship_th;
+        clone->size = ptrQueue->size;
+        ComparisonFunction cloneComp = malloc(sizeof(*cloneComp));// TODO
+    }
 
+    return (IsraeliQueue)clone;
+
+}
 
 /**@param IsraeliQueue: an IsraeliQueue created by IsraeliQueueCreate
  *
@@ -70,6 +83,7 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
  * Places the item in the foremost position accessible to it.*/
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
 {
+    // FIXME not correct implementation need to consider friends and rivals
     IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
     Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
     if(newNode == NULL)
@@ -106,12 +120,33 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
 
 /**@param IsraeliQueue: an IsraeliQueue whose friendship threshold is to be modified
  * @param friendship_threshold: a new friendship threshold for the IsraeliQueue*/
-//IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue, int);
+IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue queue, int n_thresh)
+{
+    if(queue==NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
+
+    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
+    ptrQueue->friendship_th = n_thresh;
+    return ISRAELIQUEUE_SUCCESS;
+
+}
 
 /**@param IsraeliQueue: an IsraeliQueue whose rivalry threshold is to be modified
  * @param friendship_threshold: a new rivalry threshold for the IsraeliQueue*/
-//IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue, int);
+IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue queue, int n_thresh)
+{
 
+    if(queue==NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
+
+    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
+    ptrQueue->rivalry_th = n_thresh;
+    return ISRAELIQUEUE_SUCCESS;
+}
 /**Returns the number of elements of the given queue. If the parameter is NULL, 0
  * is returned.*/
 int IsraeliQueueSize(IsraeliQueue queue)

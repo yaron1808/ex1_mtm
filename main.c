@@ -16,6 +16,8 @@ int main()
     IsraeliQueueEnqueue(iq,&c);
     printf("queue size = %d\n", IsraeliQueueSize(iq));
     int* p;
+    IsraeliQueueUpdateFriendshipThreshold(NULL,10);
+    IsraeliQueueUpdateRivalryThreshold(iq,20);
     p = IsraeliQueueDequeue(iq);
     printf("first element = %d\n",*p);
     p = IsraeliQueueDequeue(iq);
@@ -23,6 +25,6 @@ int main()
     p = IsraeliQueueDequeue(iq);
     printf("third element = %d\n",*p);
     printf("queue size = %d\n", IsraeliQueueSize(iq));
-
+//
 
 }

@@ -23,7 +23,7 @@ typedef struct node
     struct node* prev;
 }Node_t;
 
-typedef struct
+struct IsraeliQueue_t
 {
     Node_t* head;
     Node_t* tail;
@@ -32,16 +32,16 @@ typedef struct
     int friendship_th;
     int rivalry_th;
     int size;
-}IsraeliQueue_t;
+};
 
-typedef IsraeliQueue_t* IsraeliQueue; /// we need to delete this typedef
+
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
-    IsraeliQueue_t* ptrIsraeliQueue = (IsraeliQueue_t*)malloc(sizeof(IsraeliQueue_t));
+    IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
     if(ptrIsraeliQueue!=NULL)
     {
         ptrIsraeliQueue->friendsFunctions = friendsArray;
@@ -52,14 +52,14 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
         ptrIsraeliQueue->tail = NULL;
         ptrIsraeliQueue->size = 0;
     }
-    return (IsraeliQueue)ptrIsraeliQueue;
+    return ptrIsraeliQueue;
 }
 
 /**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occured during
  * the execution of the function, NULL is returned.*/
 IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
 {
-    IsraeliQueue_t* ptrIsraeliNewQueue = (IsraeliQueue_t*)malloc(sizeof(IsraeliQueue_t));
+    IsraeliQueue ptrIsraeliNewQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
     if(ptrIsraeliNewQueue!=NULL)
     {
         ptrIsraeliNewQueue->friendsFunctions = q -> friendsFunctions;
@@ -138,14 +138,16 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
  * @param friendship_threshold: a new friendship threshold for the IsraeliQueue*/
 IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int friendship_th)
 {
+    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
     q->friendship_th = friendship_th;
-    return ISRAELIQUEUE_SUCCESS; //whyyy
+    return ISRAELIQUEUE_SUCCESS;
 }
 
 /**@param IsraeliQueue: an IsraeliQueue whose rivalry threshold is to be modified
  * @param friendship_threshold: a new rivalry threshold for the IsraeliQueue*/
 IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int rivalry_th)
 {
+    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
     q->rivalry_th = rivalry_th;
     return ISRAELIQUEUE_SUCCESS;
 }
@@ -158,7 +160,7 @@ int IsraeliQueueSize(IsraeliQueue queue)
     {
         return 0;
     }
-    return ((IsraeliQueue_t*)queue)->size;
+    return queue->size;
 }
 
 /**Removes and returns the foremost element of the provided queue. If the parameter

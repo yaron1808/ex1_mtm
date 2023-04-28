@@ -6,6 +6,7 @@
 
 
 
+
 /**Error clarification:
  * ISRAELIQUEUE_SUCCESS: Indicates the function has completed its task successfully with no errors.
  * ISRAELIQUEUE_ALLOC_FAILED: Indicates memory allocation failed during the execution of the function.
@@ -22,7 +23,7 @@ typedef struct node
     struct node* prev;
 }Node_t;
 
-typedef struct
+struct IsraeliQueue_t
 {
     Node_t* head;
     Node_t* tail;
@@ -31,7 +32,8 @@ typedef struct
     int friendship_th;
     int rivalry_th;
     int size;
-}IsraeliQueue_t;
+};
+
 
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
@@ -39,7 +41,7 @@ typedef struct
  * to the new object. In case of failure, return NULL.*/
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
-    IsraeliQueue_t* ptrIsraeliQueue = (IsraeliQueue_t*)malloc(sizeof(IsraeliQueue_t));
+    IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
     if(ptrIsraeliQueue!=NULL)
     {
         ptrIsraeliQueue->friendsFunctions = friendsArray;
@@ -50,32 +52,47 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
         ptrIsraeliQueue->tail = NULL;
         ptrIsraeliQueue->size = 0;
     }
-    return (IsraeliQueue)ptrIsraeliQueue;
+    return ptrIsraeliQueue;
 }
 
-/**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occurred during
+/**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occured during
  * the execution of the function, NULL is returned.*/
-IsraeliQueue IsraeliQueueClone(IsraeliQueue queue)
+IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
 {
-    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
-    IsraeliQueue_t* clone = malloc(sizeof(IsraeliQueue_t));
-    if(clone!=NULL)
+    IsraeliQueue ptrIsraeliNewQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
+    if(ptrIsraeliNewQueue!=NULL)
     {
-        clone->rivalry_th = ptrQueue->rivalry_th;
-        clone->friendship_th = ptrQueue->friendship_th;
-        clone->size = ptrQueue->size;
-        ComparisonFunction cloneComp = malloc(sizeof(*cloneComp));// TODO
+        ptrIsraeliNewQueue->friendsFunctions = q -> friendsFunctions;
+        ptrIsraeliNewQueue->compareFunction = q -> compareFunction;;
+        ptrIsraeliNewQueue->friendship_th =  q -> friendship_th;
+        ptrIsraeliNewQueue->rivalry_th = q -> rivalry_th;
+        ptrIsraeliNewQueue->head = NULL;
+        ptrIsraeliNewQueue->tail = NULL;
+        ptrIsraeliNewQueue->size = 0;
+        Node_t* current = q -> head;
+        while (current){
+            if (IsraeliQueueInsertToTail (ptrIsraeliNewQueue,current) == ISRAELIQUEUE_ALLOC_FAILED)
+                return NULL;
+            current = current -> next;
+        }
     }
 
-    return (IsraeliQueue)clone;
+    return ptrIsraeliNewQueue;
 
 }
+
 
 /**@param IsraeliQueue: an IsraeliQueue created by IsraeliQueueCreate
  *
  * Deallocates all memory allocated by IsraeliQueueCreate for the object pointed to by
  * the parameter.*/
-//void IsraeliQueueDestroy(IsraeliQueue);
+void IsraeliQueueDestroy(IsraeliQueue q)
+{
+    while(q -> head){
+        IsraeliQueueDequeue(q);
+    }
+    free (q);
+}
 
 /**@param IsraeliQueue: an IsraeliQueue in which to insert the item.
  * @param item: an item to enqueue
@@ -83,7 +100,6 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue queue)
  * Places the item in the foremost position accessible to it.*/
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
 {
-    // FIXME not correct implementation need to consider friends and rivals
     IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
     Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
     if(newNode == NULL)
@@ -120,33 +136,22 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
 
 /**@param IsraeliQueue: an IsraeliQueue whose friendship threshold is to be modified
  * @param friendship_threshold: a new friendship threshold for the IsraeliQueue*/
-IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue queue, int n_thresh)
+IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int friendship_th)
 {
-    if(queue==NULL)
-    {
-        return ISRAELIQUEUE_BAD_PARAM;
-    }
-
-    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
-    ptrQueue->friendship_th = n_thresh;
+    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
+    q->friendship_th = friendship_th;
     return ISRAELIQUEUE_SUCCESS;
-
 }
 
 /**@param IsraeliQueue: an IsraeliQueue whose rivalry threshold is to be modified
  * @param friendship_threshold: a new rivalry threshold for the IsraeliQueue*/
-IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue queue, int n_thresh)
+IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int rivalry_th)
 {
-
-    if(queue==NULL)
-    {
-        return ISRAELIQUEUE_BAD_PARAM;
-    }
-
-    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
-    ptrQueue->rivalry_th = n_thresh;
+    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
+    q->rivalry_th = rivalry_th;
     return ISRAELIQUEUE_SUCCESS;
 }
+
 /**Returns the number of elements of the given queue. If the parameter is NULL, 0
  * is returned.*/
 int IsraeliQueueSize(IsraeliQueue queue)
@@ -155,7 +160,7 @@ int IsraeliQueueSize(IsraeliQueue queue)
     {
         return 0;
     }
-    return ((IsraeliQueue_t*)queue)->size;
+    return queue->size;
 }
 
 /**Removes and returns the foremost element of the provided queue. If the parameter
@@ -186,7 +191,15 @@ void* IsraeliQueueDequeue(IsraeliQueue queue)
  *
  * Returns whether the queue contains an element equal to item. If either
  * parameter is NULL, false is returned.*/
-//bool IsraeliQueueContains(IsraeliQueue, void *);
+bool IsraeliQueueContains(IsraeliQueue q, void *data)
+{
+    Node_t* current = q -> head;
+    while(current){
+        if (q -> compareFunction(data, current -> data)) return true;
+        current = current -> next;
+    }
+    return false;
+}
 
 /**Advances each item in the queue to the foremost position accessible to it,
  * from the back of the queue frontwards.*/
@@ -199,4 +212,37 @@ void* IsraeliQueueDequeue(IsraeliQueue queue)
  * in the exercise. Each queue in q_arr enqueues its head in the merged queue, then lets the next
  * one enqueue an item, in the order defined by q_arr. In the event of any error during execution, return NULL.*/
 //IsraeliQueue IsraeliQueueMerge(IsraeliQueue*,ComparisonFunction);
+
+
+/**@param IsraeliQueue: an IsraeliQueue in which to insert the item.
+ * @param item: an item to enqueue
+ *
+ * Places the item in the tail.*/
+IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
+{
+    Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
+    if(newNode == NULL)
+    {
+        return ISRAELIQUEUE_ALLOC_FAILED;
+    }
+
+    newNode->data = node -> data;
+    newNode->friends = node -> friends;
+    newNode->rivals = node -> rivals;
+    newNode->next = NULL;
+    newNode->prev = queue ->tail;
+    if(queue->tail==NULL)
+    {
+        queue->tail=newNode;
+        queue->head = newNode;
+    }
+    else
+    {
+        queue->tail->next = newNode;
+    }
+
+    queue->tail = newNode;
+    queue->size++;
+    return ISRAELIQUEUE_SUCCESS;
+}
 

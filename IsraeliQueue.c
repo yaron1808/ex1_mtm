@@ -34,8 +34,8 @@ struct IsraeliQueue_t
 };
 typedef struct IsraeliQueue_t IsraeliQueue_t;
 IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node);
-
-
+bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
+bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
@@ -108,44 +108,49 @@ void IsraeliQueueDestroy(IsraeliQueue q)
  * Places the item in the foremost position accessible to it.*/
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
 {
-    Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
-    Node_t* temp = (Node_t*)malloc(sizeof (Node_t));
-    if(newNode == NULL || temp == NULL)
-    {
-        return ISRAELIQUEUE_ALLOC_FAILED;
-    }
-    if(queue==NULL || item == NULL)
+    Node_t* newNode;
+    Node_t* nodeFriend = NULL;
+    Node_t* nodeRival = NULL;
+
+    if(queue == NULL || item == NULL)
     {
         return ISRAELIQUEUE_BAD_PARAM;
+    }
+
+    newNode = (Node_t*)malloc(sizeof (Node_t));
+    if(newNode == NULL)
+    {
+        return ISRAELIQUEUE_ALLOC_FAILED;
     }
     newNode->data = item;
     newNode->friends = 0;
     newNode->rivals = 0;
 
-    int i = 0;
-    double avg = 0;
-    temp = queue->head;
+    nodeFriend = queue->head;
 
-    while (temp!=NULL)
+    while (nodeFriend != NULL)
     {
-        while (queue->friendsFunctions[i] != NULL)
+        if(nodeFriend->friends < FRIEND_QUOTA && isFriends(queue, nodeFriend, newNode))
         {
-            avg+=queue->friendsFunctions[i](newNode->data,temp->data);
-            if((queue->friendsFunctions[i](newNode->data,temp->data)) > (queue->friendship_th) &&
-            temp->friends < FRIEND_QUOTA)
+            nodeRival = nodeFriend->next;
+            while(nodeRival != NULL)
             {
-                temp->friends++;
-                newNode->next = temp->next;
-                temp->next->prev = newNode;
-                temp->next = newNode;
-                newNode->prev = temp;
-                return ISRAELIQUEUE_SUCCESS;
+                if(nodeFriend->rivals < RIVAL_QUOTA && isRivals(queue, nodeFriend, newNode))
+                {
+                    nodeRival->rivals++;
+                    nodeFriend = nodeRival->next;
+                    break;
+                }
+                nodeRival=nodeRival->next;
             }
-            i++;
+            if(nodeRival==NULL)
+            {
+                break;
+            }
         }
-        temp = temp->next;
+        nodeFriend = nodeFriend->next;
     }
-    //TODO understand rivals
+
     if(queue->tail==NULL)
     {
         queue->tail=newNode;
@@ -157,11 +162,35 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
     }
 
     queue->tail = newNode;
-    queue->size++;
-    free(temp);
+
+    free(nodeFriend);
     return ISRAELIQUEUE_SUCCESS;
 }
-
+bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2)
+{
+    double avg =0;
+    int i = 0;
+    while(queue->friendsFunctions[i]!=NULL)
+    {
+        avg+=queue->friendsFunctions[i](node1->data,node2->data);
+        i++;
+    }
+    avg = avg/i;
+    return (!isFriends(queue,node1,node2)) && (avg<queue->rivalry_th);
+}
+bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2)
+{
+    int i = 0;
+    while (queue->friendsFunctions[i]!=NULL)
+    {
+        if(queue->friendsFunctions[i](node1->data,node2->data)>queue->friendship_th)
+        {
+            return true;
+        }
+        i++;
+    }
+    return false;
+}
 /**@param IsraeliQueue: an IsraeliQueue to which the function is to be added
  * @param FriendshipFunction: a FriendshipFunction to be recognized by the IsraeliQueue
  * going forward.
@@ -280,3 +309,17 @@ IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
     return ISRAELIQUEUE_SUCCESS;
 }
 
+IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* nodeExist, Node_t* nodeNew)
+{
+    if(nodeExist == queue->tail)
+    {
+        return IsraeliQueueInsertToTail(queue,nodeNew);
+    }
+
+    nodeNew->next = nodeExist->next;
+    nodeNew->prev = nodeExist;
+    nodeExist->next = nodeNew;
+    queue->size++;
+
+    return ISRAELIQUEUE_SUCCESS;
+}

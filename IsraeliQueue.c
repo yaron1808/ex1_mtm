@@ -6,7 +6,6 @@
 
 
 
-
 /**Error clarification:
  * ISRAELIQUEUE_SUCCESS: Indicates the function has completed its task successfully with no errors.
  * ISRAELIQUEUE_ALLOC_FAILED: Indicates memory allocation failed during the execution of the function.
@@ -33,6 +32,8 @@ struct IsraeliQueue_t
     int rivalry_th;
     int size;
 };
+typedef struct IsraeliQueue_t IsraeliQueue_t;
+IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node);
 
 
 
@@ -41,7 +42,7 @@ struct IsraeliQueue_t
  * to the new object. In case of failure, return NULL.*/
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
-    IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
+    IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(IsraeliQueue_t));
     if(ptrIsraeliQueue!=NULL)
     {
         ptrIsraeliQueue->friendsFunctions = friendsArray;
@@ -63,7 +64,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
     if(ptrIsraeliNewQueue!=NULL)
     {
         ptrIsraeliNewQueue->friendsFunctions = q -> friendsFunctions;
-        ptrIsraeliNewQueue->compareFunction = q -> compareFunction;;
+        ptrIsraeliNewQueue->compareFunction = q -> compareFunction;
         ptrIsraeliNewQueue->friendship_th =  q -> friendship_th;
         ptrIsraeliNewQueue->rivalry_th = q -> rivalry_th;
         ptrIsraeliNewQueue->head = NULL;
@@ -100,30 +101,57 @@ void IsraeliQueueDestroy(IsraeliQueue q)
  * Places the item in the foremost position accessible to it.*/
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
 {
-    IsraeliQueue_t *ptrQueue = (IsraeliQueue_t*) queue;
     Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
-    if(newNode == NULL)
+    Node_t* temp = (Node_t*)malloc(sizeof (Node_t));
+    if(newNode == NULL || temp == NULL)
     {
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
-
+    if(queue==NULL || data==NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
     newNode->data = data;
     newNode->friends = 0;
     newNode->rivals = 0;
-    newNode->next = NULL;
-    newNode->prev = ptrQueue->tail;
-    if(ptrQueue->tail==NULL)
+
+    int i = 0;
+    double avg = 0;
+    temp = queue->head;
+
+    while (temp!=NULL)
     {
-        ptrQueue->tail=newNode;
-        ptrQueue->head = newNode;
+        while (queue->friendsFunctions[i] != NULL)
+        {
+            avg+=queue->friendsFunctions[i](newNode->data,temp->data);
+            if((queue->friendsFunctions[i](newNode->data,temp->data)) > (queue->friendship_th) &&
+            temp->friends < FRIEND_QUOTA)
+            {
+                temp->friends++;
+                newNode->next = temp->next;
+                temp->next->prev = newNode;
+                temp->next = newNode;
+                newNode->prev = temp;
+                return ISRAELIQUEUE_SUCCESS;
+            }
+            i++;
+        }
+        temp = temp->next;
+    }
+    //TODO understand rivals
+    if(queue->tail==NULL)
+    {
+        queue->tail=newNode;
+        queue->head = newNode;
     }
     else
     {
-        ptrQueue->tail->next = newNode;
+        queue->tail->next = newNode;
     }
 
-    ptrQueue->tail = newNode;
-    ptrQueue->size++;
+    queue->tail = newNode;
+    queue->size++;
+    free(temp);
     return ISRAELIQUEUE_SUCCESS;
 }
 
@@ -167,21 +195,20 @@ int IsraeliQueueSize(IsraeliQueue queue)
  * is NULL or a pointer to an empty queue, NULL is returned.*/
 void* IsraeliQueueDequeue(IsraeliQueue queue)
 {
-    IsraeliQueue_t* ptrQueue = (IsraeliQueue_t*) queue;
     if(IsraeliQueueSize(queue)==0 || queue==NULL)
     {
         return NULL;
     }
-    Node_t* ptrNode = ptrQueue->head;
-    void* data = ptrQueue->head->data;
+    Node_t* ptrNode = queue->head;
+    void* data = queue->head->data;
 
-    ptrQueue->head = ptrQueue->head->next;
+    queue->head = queue->head->next;
     free(ptrNode);
-    if(ptrQueue->head!=NULL)
+    if(queue->head!=NULL)
     {
-        ptrQueue->head->prev = NULL;
+        queue->head->prev = NULL;
     }
-    ptrQueue->size--;
+    queue->size--;
 
     return data;
 

@@ -36,6 +36,7 @@ typedef struct IsraeliQueue_t IsraeliQueue_t;
 IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node);
 bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
+IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* nodeExist, Node_t* nodeNew);
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
@@ -151,7 +152,7 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
         nodeFriend = nodeFriend->next;
     }
 
-    if(queue->tail==NULL)
+    if(queue->tail==NULL)//empty queue
     {
         queue->tail=newNode;
         queue->head = newNode;
@@ -161,11 +162,9 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
         queue->tail->next = newNode;
     }
 
-    queue->tail = newNode;
-
-    free(nodeFriend);
-    return ISRAELIQUEUE_SUCCESS;
+    return IsraeliQueueInsertAfterNode(queue,nodeFriend,newNode);
 }
+
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2)
 {
     double avg =0;

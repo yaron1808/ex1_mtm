@@ -60,6 +60,10 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
  * the execution of the function, NULL is returned.*/
 IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
 {
+    if(q==NULL)
+    {
+        return NULL;
+    }
     IsraeliQueue ptrIsraeliNewQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
     if(ptrIsraeliNewQueue!=NULL)
     {
@@ -71,9 +75,12 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
         ptrIsraeliNewQueue->tail = NULL;
         ptrIsraeliNewQueue->size = 0;
         Node_t* current = q -> head;
-        while (current){
+        while (current)
+        {
             if (IsraeliQueueInsertToTail (ptrIsraeliNewQueue,current) == ISRAELIQUEUE_ALLOC_FAILED)
+            {
                 return NULL;
+            }
             current = current -> next;
         }
     }
@@ -99,7 +106,7 @@ void IsraeliQueueDestroy(IsraeliQueue q)
  * @param item: an item to enqueue
  *
  * Places the item in the foremost position accessible to it.*/
-IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
+IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
 {
     Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
     Node_t* temp = (Node_t*)malloc(sizeof (Node_t));
@@ -107,11 +114,11 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *data)
     {
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
-    if(queue==NULL || data==NULL)
+    if(queue==NULL || item == NULL)
     {
         return ISRAELIQUEUE_BAD_PARAM;
     }
-    newNode->data = data;
+    newNode->data = item;
     newNode->friends = 0;
     newNode->rivals = 0;
 
@@ -242,7 +249,7 @@ bool IsraeliQueueContains(IsraeliQueue q, void *data)
 
 
 /**@param IsraeliQueue: an IsraeliQueue in which to insert the item.
- * @param item: an item to enqueue
+ * @param node: an node ptr to enqueue
  *
  * Places the item in the tail.*/
 IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
@@ -252,7 +259,7 @@ IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
     {
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
-
+    assert(queue==NULL || node == NULL);
     newNode->data = node -> data;
     newNode->friends = node -> friends;
     newNode->rivals = node -> rivals;

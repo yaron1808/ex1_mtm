@@ -33,10 +33,10 @@ struct IsraeliQueue_t
     int size;
 };
 typedef struct IsraeliQueue_t IsraeliQueue_t;
-IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node);
+IsraeliQueueError IsraeliQueueClassicEnqueue (IsraeliQueue queue, Node_t* node);
 bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
-IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* nodeExist, Node_t* nodeNew);
+IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nodeNew);
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
@@ -78,7 +78,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
         Node_t* current = q -> head;
         while (current)
         {
-            if (IsraeliQueueInsertToTail (ptrIsraeliNewQueue,current) == ISRAELIQUEUE_ALLOC_FAILED)
+            if (IsraeliQueueClassicEnqueue(ptrIsraeliNewQueue, current) == ISRAELIQUEUE_ALLOC_FAILED)
             {
                 return NULL;
             }
@@ -144,7 +144,8 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
                 }
                 nodeRival=nodeRival->next;
             }
-            if(nodeRival==NULL)
+
+            if(nodeRival==NULL)// = can enqueue after friend
             {
                 break;
             }
@@ -152,15 +153,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
         nodeFriend = nodeFriend->next;
     }
 
-    if(queue->tail==NULL)//empty queue
-    {
-        queue->tail=newNode;
-        queue->head = newNode;
-    }
-    else
-    {
-        queue->tail->next = newNode;
-    }
 
     return IsraeliQueueInsertAfterNode(queue,nodeFriend,newNode);
 }
@@ -257,7 +249,10 @@ bool IsraeliQueueContains(IsraeliQueue q, void *data)
 {
     Node_t* current = q -> head;
     while(current){
-        if (q -> compareFunction(data, current -> data)) return true;
+        if (q -> compareFunction(data, current -> data))
+        {
+            return true;
+        }
         current = current -> next;
     }
     return false;
@@ -280,14 +275,14 @@ bool IsraeliQueueContains(IsraeliQueue q, void *data)
  * @param node: an node ptr to enqueue
  *
  * Places the item in the tail.*/
-IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
+IsraeliQueueError IsraeliQueueClassicEnqueue (IsraeliQueue queue, Node_t* node)
 {
     Node_t* newNode = (Node_t*)malloc(sizeof (Node_t));
     if(newNode == NULL)
     {
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
-    assert(queue==NULL || node == NULL);
+    //assert(queue==NULL || node == NULL);
     newNode->data = node -> data;
     newNode->friends = node -> friends;
     newNode->rivals = node -> rivals;
@@ -308,16 +303,30 @@ IsraeliQueueError IsraeliQueueInsertToTail (IsraeliQueue queue, Node_t* node)
     return ISRAELIQUEUE_SUCCESS;
 }
 
-IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* nodeExist, Node_t* nodeNew)
+IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nodeNew)
 {
-    if(nodeExist == queue->tail)
+    if(friend == NULL)//emptyQueue
     {
-        return IsraeliQueueInsertToTail(queue,nodeNew);
+        queue->head = nodeNew;
+        queue->tail = nodeNew;
+        nodeNew->next = NULL;
+        nodeNew->prev = NULL;
+        queue->size++;
+        return ISRAELIQUEUE_SUCCESS;
+    }
+    if(friend == queue->tail)
+    {
+        nodeNew->prev = queue->tail;
+        queue->tail->next = nodeNew;
+        queue->tail = nodeNew;
+        nodeNew->next = NULL;
+        queue->size++;
+        return ISRAELIQUEUE_SUCCESS;
     }
 
-    nodeNew->next = nodeExist->next;
-    nodeNew->prev = nodeExist;
-    nodeExist->next = nodeNew;
+    nodeNew->next = friend->next;
+    nodeNew->prev = friend;
+    friend->next = nodeNew;
     queue->size++;
 
     return ISRAELIQUEUE_SUCCESS;

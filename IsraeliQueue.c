@@ -89,20 +89,14 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
     {
         return NULL;
     }
-    IsraeliQueue ptrIsraeliNewQueue = (IsraeliQueue)malloc(sizeof(struct IsraeliQueue_t));
-    if(ptrIsraeliNewQueue!=NULL)
+
+    IsraeliQueue clone = IsraeliQueueCreate(q->friendsFunctions,q->compareFunction,q->friendship_th,q->rivalry_th);
+    if(clone!=NULL)
     {
-        ptrIsraeliNewQueue->friendsFunctions = q -> friendsFunctions;
-        ptrIsraeliNewQueue->compareFunction = q -> compareFunction;
-        ptrIsraeliNewQueue->friendship_th =  q -> friendship_th;
-        ptrIsraeliNewQueue->rivalry_th = q -> rivalry_th;
-        ptrIsraeliNewQueue->head = NULL;
-        ptrIsraeliNewQueue->tail = NULL;
-        ptrIsraeliNewQueue->size = 0;
         Node_t* current = q -> head;
         while (current)
         {
-            if (IsraeliQueueClassicEnqueue(ptrIsraeliNewQueue, current) == ISRAELIQUEUE_ALLOC_FAILED)
+            if (IsraeliQueueClassicEnqueue(clone, current) == ISRAELIQUEUE_ALLOC_FAILED)
             {
                 return NULL;
             }
@@ -110,7 +104,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
         }
     }
 
-    return ptrIsraeliNewQueue;
+    return clone;
 
 }
 

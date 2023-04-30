@@ -33,6 +33,8 @@ struct IsraeliQueue_t
     int size;
 };
 typedef struct IsraeliQueue_t IsraeliQueue_t;
+void copyFunctionToArray(FriendshipFunction* source, FriendshipFunction* dest);
+int friendsArraySize(FriendshipFunction* friendsArr);
 IsraeliQueueError IsraeliQueueClassicEnqueue (IsraeliQueue queue, Node_t* node);
 bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
@@ -44,9 +46,11 @@ IsraeliQueueError IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
     IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(IsraeliQueue_t));
-    if(ptrIsraeliQueue!=NULL)
+    FriendshipFunction* newArray = malloc(sizeof (friendsArray) * friendsArraySize(friendsArray));
+    copyFunctionToArray(friendsArray,newArray);
+    if(ptrIsraeliQueue!=NULL && newArray!=NULL)
     {
-        ptrIsraeliQueue->friendsFunctions = friendsArray;
+        ptrIsraeliQueue->friendsFunctions = newArray;
         ptrIsraeliQueue->compareFunction = compare;
         ptrIsraeliQueue->friendship_th = friendship_th;
         ptrIsraeliQueue->rivalry_th = rivalry_th;
@@ -57,6 +61,24 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunc
     return ptrIsraeliQueue;
 }
 
+int friendsArraySize(FriendshipFunction* friendsArr)
+{
+    int i = 0;
+    while (friendsArr[i]!=NULL)
+    {
+        i++;
+    }
+    return i;
+}
+void copyFunctionToArray(FriendshipFunction* source, FriendshipFunction* dest)
+{
+    assert(friendsArraySize(source) == friendsArraySize(dest));
+
+    for(int i = 0; i< friendsArraySize(source);i++)
+    {
+        dest[i] = source[i];
+    }
+}
 /**Returns a new queue with the same elements as the parameter. If the parameter is NULL or any error occured during
  * the execution of the function, NULL is returned.*/
 IsraeliQueue IsraeliQueueClone(IsraeliQueue q)

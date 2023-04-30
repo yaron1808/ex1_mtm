@@ -39,7 +39,8 @@ IsraeliQueueError IsraeliQueueClassicEnqueue (IsraeliQueue queue, Node_t* node);
 bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 void IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nodeNew);
-
+void addNode(IsraeliQueue queue, Node_t* newNode);
+Node_t* dequeueFromTail(IsraeliQueue queue);
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
@@ -115,6 +116,10 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
  * the parameter.*/
 void IsraeliQueueDestroy(IsraeliQueue q)
 {
+    if(q==NULL)
+    {
+        return;
+    }
     while(q -> head){
         IsraeliQueueDequeue(q);
     }
@@ -128,8 +133,7 @@ void IsraeliQueueDestroy(IsraeliQueue q)
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
 {
     Node_t* newNode;
-    Node_t* nodeFriend = NULL;
-    Node_t* nodeRival = NULL;
+
 
     if(queue == NULL || item == NULL)
     {
@@ -145,43 +149,7 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
     newNode->friends = 0;
     newNode->rivals = 0;
 
-    if(queue->size == 0)//first enqueue
-    {
-        queue->head = newNode;
-        queue->tail = newNode;
-        newNode->next = NULL;
-        newNode->prev = NULL;
-        queue->size++;
-        return ISRAELIQUEUE_SUCCESS;
-    }
-    nodeFriend = queue->head;
-
-    while (nodeFriend != NULL)
-    {
-        if(nodeFriend->friends < FRIEND_QUOTA && isFriends(queue, nodeFriend, newNode))
-        {
-            nodeRival = nodeFriend->next;
-            while(nodeRival != NULL)
-            {
-                if(nodeFriend->rivals < RIVAL_QUOTA && isRivals(queue, nodeFriend, newNode))
-                {
-                    nodeRival->rivals++;
-                    nodeFriend = nodeRival->next;
-                    break;
-                }
-                nodeRival=nodeRival->next;
-            }
-
-            if(nodeRival==NULL)// = can enqueue after friend
-            {
-                break;
-            }
-        }
-        nodeFriend = nodeFriend->next;
-    }
-
-
-    IsraeliQueueInsertAfterNode(queue,nodeFriend,newNode);
+    addNode(queue,newNode);
     return ISRAELIQUEUE_SUCCESS;
 }
 
@@ -250,7 +218,7 @@ int IsraeliQueueSize(IsraeliQueue queue)
  * is NULL or a pointer to an empty queue, NULL is returned.*/
 void* IsraeliQueueDequeue(IsraeliQueue queue)
 {
-    if(IsraeliQueueSize(queue)==0 || queue==NULL)
+    if(queue == NULL || queue->size == 0)//
     {
         return NULL;
     }
@@ -259,15 +227,42 @@ void* IsraeliQueueDequeue(IsraeliQueue queue)
 
     queue->head = queue->head->next;
     free(ptrNode);
-    if(queue->head!=NULL)
+    if(queue->head!=NULL)//if there is more than one node in the queue
     {
         queue->head->prev = NULL;
     }
+    else//if there is only one node in the queue
+    {
+        queue->tail = NULL;
+    }
+
     queue->size--;
 
     return data;
-
 }
+//    if(IsraeliQueueSize(queue) == 0 || queue==NULL)
+//    {
+//        return NULL;
+//    }
+//    Node_t* ptrNode = queue->head;
+//    void* data = queue->head->data;
+//
+//    queue->head = queue->head->next;
+//    free(ptrNode);
+//    if(queue->head!=NULL)
+//    {
+//        queue->head->prev = NULL;
+//    }
+//    else
+//    {
+//        queue->tail = NULL;
+//    }
+//
+//    queue->size--;
+//
+//    return data;
+
+
 
 /**@param item: an object comparable to the objects in the IsraeliQueue
  *
@@ -288,7 +283,84 @@ bool IsraeliQueueContains(IsraeliQueue q, void *data)
 
 /**Advances each item in the queue to the foremost position accessible to it,
  * from the back of the queue frontwards.*/
-//IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue);
+IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue queue)
+{
+    if(queue == NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
+
+    Node_t* curr = NULL;
+    IsraeliQueue q2 = IsraeliQueueCreate(queue->friendsFunctions,queue->compareFunction,queue->friendship_th,queue->rivalry_th);
+    if(q2 ==NULL)
+    {
+        return ISRAELIQUEUE_ALLOC_FAILED;
+    }
+
+    while(queue->size>0)
+    {
+        curr = dequeueFromTail(queue);
+        addNode(q2,curr);
+    }
+    queue->head = q2->head;
+    queue->tail = q2->tail;
+    queue->size = q2->size;
+    free(q2);
+    return ISRAELIQUEUE_SUCCESS;
+}
+
+Node_t* dequeueFromTail(IsraeliQueue queue)
+{
+    Node_t* tail = queue->tail;
+    queue->tail = tail->prev;
+    queue->tail->next = NULL;
+    queue->size--;
+    return tail;
+}
+void addNode(IsraeliQueue queue, Node_t* newNode)
+{
+
+    Node_t* nodeFriend = NULL;
+    Node_t* nodeRival = NULL;
+
+    if(queue->size == 0)//first enqueue
+    {
+        queue->head = newNode;
+        queue->tail = newNode;
+        newNode->next = NULL;
+        newNode->prev = NULL;
+        queue->size++;
+        return;
+    }
+    nodeFriend = queue->head;
+
+    while (nodeFriend != NULL)
+    {
+        if(nodeFriend->friends < FRIEND_QUOTA && isFriends(queue, nodeFriend, newNode))
+        {
+            nodeRival = nodeFriend->next;
+            while(nodeRival != NULL)
+            {
+                if(nodeFriend->rivals < RIVAL_QUOTA && isRivals(queue, nodeFriend, newNode))
+                {
+                    nodeRival->rivals++;
+                    nodeFriend = nodeRival->next;
+                    break;
+                }
+                nodeRival=nodeRival->next;
+            }
+
+            if(nodeRival==NULL)// = can enqueue after friend
+            {
+                break;
+            }
+        }
+        nodeFriend = nodeFriend->next;
+    }
+
+
+    IsraeliQueueInsertAfterNode(queue,nodeFriend,newNode);
+}
 
 /**@param q_arr: a NULL-terminated array of IsraeliQueues
  * @param ComparisonFunction: a comparison function for the merged queue

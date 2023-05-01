@@ -91,7 +91,8 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
         return NULL;
     }
 
-    IsraeliQueue clone = IsraeliQueueCreate(q->friendsFunctions,q->compareFunction,q->friendship_th,q->rivalry_th);
+    IsraeliQueue clone=
+    IsraeliQueueCreate(q->friendsFunctions,q->compareFunction,q->friendship_th,q->rivalry_th);
     if(clone!=NULL)
     {
         Node_t* current = q -> head;
@@ -268,27 +269,6 @@ void* IsraeliQueueDequeue(IsraeliQueue queue)
 
     return data;
 }
-//    if(IsraeliQueueSize(queue) == 0 || queue==NULL)
-//    {
-//        return NULL;
-//    }
-//    Node_t* ptrNode = queue->head;
-//    void* data = queue->head->data;
-//
-//    queue->head = queue->head->next;
-//    free(ptrNode);
-//    if(queue->head!=NULL)
-//    {
-//        queue->head->prev = NULL;
-//    }
-//    else
-//    {
-//        queue->tail = NULL;
-//    }
-//
-//    queue->size--;
-//
-//    return data;
 
 
 
@@ -369,7 +349,7 @@ Node_t* removeFromTail(IsraeliQueue queue)
 
 
 
-    //queue->size--;
+
 
 }
 void addNode(IsraeliQueue queue, Node_t* newNode)

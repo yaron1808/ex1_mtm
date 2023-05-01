@@ -1,30 +1,49 @@
 #include "IsraeliQueue.h"
 #include <stdio.h>
+int friend1(void* a, void* b)
+{
+    int aa = *(int*)a;
+    int bb = *(int*)b;
+    return aa+bb;
+}
+int friend2(void* a, void* b)
+{
+    int aa = *(int*)a;
+    int bb = *(int*)b;
+    return aa-bb;
+}
 
 int main()
 {
-   int a = 100;
-   int b = 200;
-   int c = 300;
 
+    FriendshipFunction arr[3];
+    arr[0] = &friend1;
+    arr[1] = &friend2;
+    arr[2] = NULL;
+    int nums[10] = {1,2,3,4,5,6,7,8,9,10};
 
-   IsraeliQueue iq = IsraeliQueueCreate(NULL,NULL,8,9);
-   printf("queue size = %d\n", IsraeliQueueSize(iq));
+    IsraeliQueue q = IsraeliQueueCreate(arr, NULL, 5, 3);
+    for (int i = 0; i < 10; ++i) {
+        IsraeliQueueEnqueue(q, &nums[i]);
+    }
+    printf("size: %d\n", IsraeliQueueSize(q));
+    //dequeue
+    for (int i = 0; i < 10; ++i) {
+        int* num = (int*)IsraeliQueueDequeue(q);
+        printf("%d, ", *num);
+    }
+    printf("\n");
 
-    IsraeliQueueEnqueue(iq,&a);
-    IsraeliQueueEnqueue(iq,&b);
-    IsraeliQueueEnqueue(iq,&c);
-    printf("queue size = %d\n", IsraeliQueueSize(iq));
-    int* p;
-    IsraeliQueueUpdateFriendshipThreshold(NULL,10);
-    IsraeliQueueUpdateRivalryThreshold(iq,20);
-    p = IsraeliQueueDequeue(iq);
-    printf("first element = %d\n",*p);
-    p = IsraeliQueueDequeue(iq);
-    printf("second element = %d\n",*p);
-    p = IsraeliQueueDequeue(iq);
-    printf("third element = %d\n",*p);
-    printf("queue size = %d\n", IsraeliQueueSize(iq));
-//
+    for (int i = 0; i < 10; ++i) {
+        IsraeliQueueEnqueue(q, &nums[i]);
+    }
+    printf("size: %d\n", IsraeliQueueSize(q));
+    IsraeliQueueImprovePositions(q);
+    //dequeue
+    for (int i = 0; i < 10; ++i) {
+        int* num = (int*)IsraeliQueueDequeue(q);
+        printf("%d, ", *num);
+    }
+        printf("\n");
 
 }

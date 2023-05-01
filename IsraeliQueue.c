@@ -40,7 +40,7 @@ bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 void IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nodeNew);
 void addNode(IsraeliQueue queue, Node_t* newNode);
-Node_t* dequeueFromTail(IsraeliQueue queue);
+Node_t* removeFromTail(IsraeliQueue queue);
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
@@ -299,7 +299,7 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue queue)
 
     while(queue->size>0)
     {
-        curr = dequeueFromTail(queue);
+        curr = removeFromTail(queue);
         addNode(q2,curr);
     }
     queue->head = q2->head;
@@ -309,13 +309,40 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue queue)
     return ISRAELIQUEUE_SUCCESS;
 }
 
-Node_t* dequeueFromTail(IsraeliQueue queue)
+Node_t* removeFromTail(IsraeliQueue queue)
 {
-    Node_t* tail = queue->tail;
-    queue->tail = tail->prev;
-    queue->tail->next = NULL;
-    queue->size--;
-    return tail;
+    if(queue->head == NULL)
+    {
+        return NULL;
+    }
+
+    else if(queue->head == queue->tail)
+    {
+        Node_t* ptrNode = queue->head;
+        queue->head = NULL;
+        queue->tail = NULL;
+        queue->size--;
+        return ptrNode;
+    }
+
+    else
+    {
+        Node_t* curr = queue->head;
+        while(curr->next != queue->tail)
+        {
+            curr = curr->next;
+        }
+        Node_t* ptrNode = queue->tail;
+        queue->tail = curr;
+        queue->tail->next = NULL;
+        queue->size--;
+        return ptrNode;
+    }
+
+
+
+    //queue->size--;
+
 }
 void addNode(IsraeliQueue queue, Node_t* newNode)
 {
@@ -352,6 +379,7 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
 
             if(nodeRival==NULL)// = can enqueue after friend
             {
+                nodeFriend->friends++;
                 break;
             }
         }

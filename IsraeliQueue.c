@@ -183,22 +183,50 @@ bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2)
  * going forward.
  *
  * Makes the IsraeliQueue provided recognize the FriendshipFunction provided.*/
-//IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue, FriendshipFunction);
+IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue queue, FriendshipFunction newFriendFunction)
+{
+    if (queue == NULL || newFriendFunction == NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
+    int i = 0;
+    while (queue->friendsFunctions[i]!=NULL)
+    {
+        i++;
+    }
+    FriendshipFunction* newArray = (FriendshipFunction*) malloc((i+2) * sizeof(FriendshipFunction)); //allocate i+2 for NULL and the newFriendFunction
+    int j = 0;
+    while (queue->friendsFunctions[j]!=NULL)
+    {
+        newArray[j] = queue->friendsFunctions[j];
+        j++;
+    }
+    newArray[i] = newFriendFunction;
+    newArray[i+1] = NULL;//do i need to allocate for the NULL??
+    free(queue->friendsFunctions); //do i need to free also every pointer in the array???
+    queue->friendsFunctions = newArray;
+    return ISRAELIQUEUE_SUCCESS;
+}
 
 /**@param IsraeliQueue: an IsraeliQueue whose friendship threshold is to be modified
  * @param friendship_threshold: a new friendship threshold for the IsraeliQueue*/
 IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int friendship_th)
 {
-    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
+    if (q == NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
     q->friendship_th = friendship_th;
     return ISRAELIQUEUE_SUCCESS;
 }
 
 /**@param IsraeliQueue: an IsraeliQueue whose rivalry threshold is to be modified
  * @param friendship_threshold: a new rivalry threshold for the IsraeliQueue*/
-IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int rivalry_th)
-{
-    if (q == NULL) return ISRAELIQUEUE_BAD_PARAM;
+IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int rivalry_th) {
+    if (q == NULL)
+    {
+        return ISRAELIQUEUE_BAD_PARAM;
+    }
     q->rivalry_th = rivalry_th;
     return ISRAELIQUEUE_SUCCESS;
 }
@@ -396,7 +424,36 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
  * Merges all queues in q_arr into a single new queue, with parameters the parameters described
  * in the exercise. Each queue in q_arr enqueues its head in the merged queue, then lets the next
  * one enqueue an item, in the order defined by q_arr. In the event of any error during execution, return NULL.*/
-//IsraeliQueue IsraeliQueueMerge(IsraeliQueue*,ComparisonFunction);
+IsraeliQueue IsraeliQueueMerge(IsraeliQueue* israeliQueueArray ,ComparisonFunction newCompareFunction)
+{
+    if (israeliQueueArray == NULL || newCompareFunction == NULL)
+    {
+        return NULL;
+    }
+    int numOfQueue = 0;
+    int friendship_th = 0;
+    int rivalry_th = 1;
+    while(israeliQueueArray[numOfQueue] != NULL)
+    {
+        friendship_th = friendship_th + israeliQueueArray[numOfQueue] -> friendship_th;
+        rivalry_th = rivalry_th * israeliQueueArray[numOfQueue] -> rivalry_th;
+                numOfQueue++;
+    }
+    friendship_th = friendship_th/numOfQueue; //maybe need to cast to double???
+    if (rivalry_th < 0)
+    {
+        rivalry_th = rivalry_th * -1;
+    }
+    if (rivalry_th % numOfQueue == 0)
+    {
+        rivalry_th = rivalry_th/numOfQueue;
+    }
+    else
+    {
+        rivalry_th = rivalry_th/numOfQueue + 1;
+    }
+
+}
 
 
 /**@param IsraeliQueue: an IsraeliQueue in which to insert the item.

@@ -339,12 +339,12 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue queue)
 
 Node_t* removeFromTail(IsraeliQueue queue)
 {
-    if(queue->head == NULL)
+    if(queue->head == NULL)//if the queue is empty
     {
         return NULL;
     }
 
-    else if(queue->head == queue->tail)
+    else if(queue->head == queue->tail)//if there is only one node in the queue
     {
         Node_t* ptrNode = queue->head;
         queue->head = NULL;
@@ -353,10 +353,10 @@ Node_t* removeFromTail(IsraeliQueue queue)
         return ptrNode;
     }
 
-    else
+    else//if there is more than one node in the queue
     {
         Node_t* curr = queue->head;
-        while(curr->next != queue->tail)
+        while(curr->next != queue->tail)//find the node before the tail
         {
             curr = curr->next;
         }

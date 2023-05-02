@@ -17,4 +17,6 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers);
 
 EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues);
 
+void hackEnrollment(EnrollmentSystem sys, FILE* out);
+
 #endif //HACKENROLLMENT_H

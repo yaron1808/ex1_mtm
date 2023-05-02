@@ -18,6 +18,7 @@ typedef struct node
     void* data;
     int friends;
     int rivals;
+    bool improved;
     struct node* next;
     struct node* prev;
 }Node_t;
@@ -44,7 +45,8 @@ Node_t* removeFromTail(IsraeliQueue queue);
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
-IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
+IsraeliQueue IsraeliQueueCreate
+(FriendshipFunction* friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
     IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(IsraeliQueue_t));
     int len = friendsArraySize(friendsArray);
@@ -100,6 +102,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q)
         {
             if (IsraeliQueueClassicEnqueue(clone, current) == ISRAELIQUEUE_ALLOC_FAILED)
             {
+                free(clone);
                 return NULL;
             }
             current = current -> next;
@@ -124,7 +127,9 @@ void IsraeliQueueDestroy(IsraeliQueue q)
     while(q -> head){
         IsraeliQueueDequeue(q);
     }
-    free (q);
+    free(q->friendsFunctions);
+    free(q);
+
 }
 
 /**@param IsraeliQueue: an IsraeliQueue in which to insert the item.
@@ -149,7 +154,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
     newNode->data = item;
     newNode->friends = 0;
     newNode->rivals = 0;
-
     addNode(queue,newNode);
     return ISRAELIQUEUE_SUCCESS;
 }
@@ -213,7 +217,7 @@ IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue queue, Friendshi
  * @param friendship_threshold: a new friendship threshold for the IsraeliQueue*/
 IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int friendship_th)
 {
-    if (q == NULL)
+    if (q == NULL || friendship_th < 0) //TODO - can friendship_th be negative?
     {
         return ISRAELIQUEUE_BAD_PARAM;
     }
@@ -224,7 +228,7 @@ IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int frie
 /**@param IsraeliQueue: an IsraeliQueue whose rivalry threshold is to be modified
  * @param friendship_threshold: a new rivalry threshold for the IsraeliQueue*/
 IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int rivalry_th) {
-    if (q == NULL)
+    if (q == NULL || rivalry_th < 0)
     {
         return ISRAELIQUEUE_BAD_PARAM;
     }
@@ -247,7 +251,7 @@ int IsraeliQueueSize(IsraeliQueue queue)
  * is NULL or a pointer to an empty queue, NULL is returned.*/
 void* IsraeliQueueDequeue(IsraeliQueue queue)
 {
-    if(queue == NULL || queue->size == 0)//
+    if(queue == NULL || queue->size == 0)
     {
         return NULL;
     }
@@ -297,23 +301,23 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue queue)
     {
         return ISRAELIQUEUE_BAD_PARAM;
     }
-
-    Node_t* curr = NULL;
-    IsraeliQueue q2 = IsraeliQueueCreate(queue->friendsFunctions,queue->compareFunction,queue->friendship_th,queue->rivalry_th);
-    if(q2 ==NULL)
+    Node_t* curr = queue->head;
+    while (curr!=NULL)
     {
-        return ISRAELIQUEUE_ALLOC_FAILED;
+        curr->improved = false;
+        curr = curr->next;
     }
-
-    while(queue->size>0)
+    curr = queue->tail;
+    while (curr!=NULL)
     {
-        curr = removeFromTail(queue);
-        addNode(q2,curr);
+        if(curr->improved == false)
+        {
+            Node_t* ptrNode = removeFromTail(queue);
+            addNode(queue,ptrNode);
+            curr->improved = true;
+        }
+        curr = curr->prev;
     }
-    queue->head = q2->head;
-    queue->tail = q2->tail;
-    queue->size = q2->size;
-    free(q2);
     return ISRAELIQUEUE_SUCCESS;
 }
 

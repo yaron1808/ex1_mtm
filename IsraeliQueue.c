@@ -51,6 +51,10 @@ Node_t* removeFromTail(IsraeliQueue queue);
 IsraeliQueue IsraeliQueueCreate
 (FriendshipFunction* friendsArray, ComparisonFunction compare, int friendship_th, int rivalry_th)
 {
+    if(friendsArray==NULL || compare==NULL)
+    {
+        return NULL;
+    }
     IsraeliQueue ptrIsraeliQueue = (IsraeliQueue)malloc(sizeof(IsraeliQueue_t));
     int len = friendsArraySize(friendsArray);
     FriendshipFunction* newArr = malloc(sizeof (FriendshipFunction) * (len + 1));

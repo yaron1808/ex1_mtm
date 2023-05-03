@@ -7,7 +7,7 @@
 
  struct Students_t
 {
-    long long id;
+    char* id;
     int totalCredits;
     int GPA;
     char* firstName;
@@ -16,8 +16,8 @@
     char* department;
     bool isHacker;
     char** desiredCourses;
-    long long* friendsIds;
-    long long* rivalsIds;
+    char** friendsIds;
+    char** rivalsIds;
 
 };
 
@@ -41,7 +41,7 @@ Student* createStudentsArray(FILE* students, FILE* hackers);
 Course* createCoursesArray(FILE* courses);
 IsraeliQueue* createQueuesArray(FILE* courses);
 int findHowManyEnters(FILE* file);
-Student createStudent(long long id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, long long* friendsIds, long long* rivalsIds);
+Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds);
 Student* createHackersArray(FILE* hackers);
 int howManySpaces(char* str);
 Course createCourse(char* courseNumber, int size);
@@ -118,7 +118,7 @@ Student* createStudentsArray(FILE* students, FILE* hackers)
         return NULL;
     }
 
-    long long id;
+    char* id;
     int totalCredits;
     int GPA;
     char* firstName;
@@ -193,7 +193,7 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
 
 }
 
-Student createStudent(long long id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, long long* friendsIds, long long* rivalsIds)
+Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds)
 {
     if(firstName == NULL || lastName == NULL || city == NULL || department == NULL || desiredCourses == NULL || friendsIds == NULL || rivalsIds == NULL)
     {
@@ -238,7 +238,7 @@ int IdsDiff(long long id1, long long id2)
     return ABS(id1-id2);
 }
 
-int nameDiff(char* firstName1, char* firstName2, char* lastName1, char* lastName)
+int nameDiff(const char* firstName1, const char* firstName2, const char* lastName1, const char* lastName)
 {
     int firstNameDiff = 0;
     int lastNameDiff = 0;

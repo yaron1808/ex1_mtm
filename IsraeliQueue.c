@@ -232,8 +232,8 @@ IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue queue, Friendshi
         j++;
     }
     newArray[i] = newFriendFunction;
-    newArray[i+1] = NULL;//do i need to allocate for the NULL??
-    free(queue->friendsFunctions); //do i need to free also every pointer in the array???
+    newArray[i+1] = NULL;
+    free(queue->friendsFunctions);
     queue->friendsFunctions = newArray;
     return ISRAELIQUEUE_SUCCESS;
 }

@@ -37,7 +37,7 @@ Student* createStudentsArray(FILE* students);
 Course* createCoursesArray(FILE* courses);
 IsraeliQueue* createQueuesArray(FILE* courses);
 int findHowManyEnters(FILE* file);
-
+Course createCourse(char* courseNumber, int size);
 
 EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers){
     if(students == NULL || courses == NULL || hackers == NULL)
@@ -65,7 +65,20 @@ Student* createStudentsArray(FILE* students)
 
 Course* createCoursesArray(FILE* courses)
 {
-
+    int len = findHowManyEnters(courses);
+    if (len == -1)
+    {
+        return NULL;
+    }
+    Course* coursesArray = malloc(len * sizeof (Courses_t));
+    for (int i = 0; i < len; i++)
+    {
+        char* courseNumber;
+        int size;
+        fscanf(courses, "%s %d", courseNumber, &size);
+        coursesArray[i] = createCourse(courseNumber, size);
+    }
+    return coursesArray;
 }
 
 IsraeliQueue* createQueuesArray(FILE* courses)

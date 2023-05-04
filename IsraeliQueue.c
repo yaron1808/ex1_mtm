@@ -44,6 +44,10 @@ bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2);
 void IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nodeNew);
 void addNode(IsraeliQueue queue, Node_t* newNode);
 Node_t* removeFromTail(IsraeliQueue queue);
+int FindTheFriendship_thForTheMergeFnction (int friendship_th, int numOfQueue);
+int FindTheRivalry_thForTheMergeFnction (int rivalry_th, int numOfQueue);
+
+
 
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
@@ -93,7 +97,7 @@ int friendsArraySize(FriendshipFunction* friendsArr)
  */
 void copyFunctionToArray(FriendshipFunction* source, FriendshipFunction* dest)
 {
-    assert(friendsArraySize(source) == friendsArraySize(dest));
+    assert(friendsArraySize(source) <= friendsArraySize(dest));
 
     for(int i = 0; i< friendsArraySize(source);i++)
     {
@@ -446,28 +450,97 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue* israeliQueueArray ,ComparisonFuncti
     int numOfQueue = 0;
     int friendship_th = 0;
     int rivalry_th = 1;
+    int sizeOfFriendshipArray = 0;
     while(israeliQueueArray[numOfQueue] != NULL)
     {
         friendship_th = friendship_th + israeliQueueArray[numOfQueue] -> friendship_th;
         rivalry_th = rivalry_th * israeliQueueArray[numOfQueue] -> rivalry_th;
-                numOfQueue++;
+        numOfQueue++;
+        sizeOfFriendshipArray = sizeOfFriendshipArray + friendsArraySize (israeliQueueArray[numOfQueue] -> friendsFunctions);
+
     }
-    friendship_th = friendship_th/numOfQueue; //maybe need to cast to double???
+    friendship_th = FindTheFriendship_thForTheMergeFnction (friendship_th, numOfQueue);
+    rivalry_th = FindTheRivalry_thForTheMergeFnction (rivalry_th,numOfQueue);
+    FriendshipFunction* mergeArray = malloc(sizeof (FriendshipFunction) * (sizeOfFriendshipArray + 1));
+    if (mergeArray == NULL)
+    {
+        return NULL;
+    }
+    FriendshipFunction* currentArray = mergeArray;
+    for (int i = 0; i < numOfQueue; i++)
+    {
+        copyFunctionToArray(israeliQueueArray[i] -> friendsFunctions,currentArray);
+        currentArray = & (currentArray[friendsArraySize(israeliQueueArray[i] -> friendsFunctions)]);
+    }
+    mergeArray[sizeOfFriendshipArray] = NULL;
+    IsraeliQueue IsraeliQueueMerge = IsraeliQueueCreate(mergeArray,newCompareFunction,friendship_th, rivalry_th);
+    bool enter = true;
+    while(enter)
+    {
+        enter = false;
+        for (int i = 0; i < numOfQueue; i++)
+        {
+            if (israeliQueueArray[i]->head == NULL)
+            {
+                continue;
+            }
+            if (IsraeliQueueClassicEnqueue(IsraeliQueueMerge, israeliQueueArray[i]->head) != ISRAELIQUEUE_SUCCESS)
+            {
+                return NULL;
+            }
+            IsraeliQueueDequeue(israeliQueueArray[i]);
+            enter = true;
+        }
+    }
+    for (int i = 0; i < numOfQueue; i++)
+    {
+        IsraeliQueueDestroy(israeliQueueArray[i]);
+    }
+    return IsraeliQueueMerge;
+}
+/**
+ *
+ * @param friendship_th: the sum of the friendship_th of all the israeliqueue in the array
+ * @param numOfQueue: the size of the israeliqueue array
+ * @return
+ */
+int FindTheFriendship_thForTheMergeFnction (int friendship_th, int numOfQueue)
+{
+    if (friendship_th % numOfQueue == 0)
+    {
+        friendship_th = friendship_th/numOfQueue;
+    }
+    else
+    {
+        friendship_th = friendship_th/numOfQueue + 1;
+    }
+    return friendship_th;
+}
+/**
+ *
+ * @param rivalry_th: the multiplication of the rivalry_th of all the israeliqueue in the array
+ * @param numOfQueue: the size of the israeliqueue array
+ * @return
+ */
+int FindTheRivalry_thForTheMergeFnction (int rivalry_th, int numOfQueue)
+{
     if (rivalry_th < 0)
     {
         rivalry_th = rivalry_th * -1;
     }
-    if (rivalry_th % numOfQueue == 0)
-    {
-        rivalry_th = rivalry_th/numOfQueue;
-    }
-    else
-    {
-        rivalry_th = rivalry_th/numOfQueue + 1;
-    }
 
+    int x = 0;
+    int exponent = 0;
+    while(exponent < rivalry_th)
+    {
+        x++;
+        int exponent = 1;
+        for(int i = 0; i < numOfQueue; i++){
+            exponent = exponent * x;
+        }
+    }
+    return x;
 }
-
 
 /**@param IsraeliQueue: an IsraeliQueue in which to insert the item.
  * @param node: an node ptr to enqueue

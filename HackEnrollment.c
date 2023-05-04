@@ -160,10 +160,7 @@ Course* createCoursesArray(FILE* courses)
     return coursesArray;
 }
 
-IsraeliQueue* createQueuesArray(FILE* courses)
-{
 
-}
 int findHowManyEnters(FILE* file)
 {
     if(file == NULL)

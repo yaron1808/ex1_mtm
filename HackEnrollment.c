@@ -215,10 +215,6 @@ Student* createStudentsArray(FILE* students, int* len)
 
 Course createCourse(int courseNumber, int size)
 {
-    if(courseNumber == NULL )
-    {
-        return NULL;
-    }
     Course course = malloc(sizeof(*course));
     if(course == NULL)
     {

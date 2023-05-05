@@ -383,6 +383,26 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
     {
         return NULL;
     }
+    int len = findHowManyEnters(queues);
+    for (int i = 0; i < len; i++)
+    {
+        int courseNumber;
+        int num = fscanf(queues, "%d", &courseNumber);
+        assert(num == 1);
+        int i = 0;
+        while (sys ->courses[i] != NULL)
+        {
+            if (courseNumber == sys ->courses[i] ->courseNumber)
+            {
+                break;
+            }
+            i++;
+        }
+        IsraeliQueue queue = IsraeliQueueCreate(, ,20,0); //need to create compare function and friend function
+        sys ->courses[i]->queue = queue;
+
+
+    }
 
     return NULL;
 

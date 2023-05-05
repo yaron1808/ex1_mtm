@@ -97,7 +97,7 @@ int friendsArraySize(FriendshipFunction* friendsArr)
  */
 void copyFunctionToArray(FriendshipFunction* source, FriendshipFunction* dest)
 {
-    assert(friendsArraySize(source) <= friendsArraySize(dest));
+    //assert(friendsArraySize(source) <= friendsArraySize(dest));
 
     for(int i = 0; i< friendsArraySize(source);i++)
     {

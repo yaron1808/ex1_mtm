@@ -1,35 +1,45 @@
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "HackEnrollment.h"
 #include "IsraeliQueue.h"
 
 #define ABS(N) (((N)<0)?(-(N)):((N)))
 
- struct Students_t
+
+typedef struct Hacker_t* Hacker;
+typedef struct Courses_t* Course;
+typedef struct Student_t* Student;
+
+ struct Student_t
 {
-    char* id;
+    int id;
     int totalCredits;
     int GPA;
     char* firstName;
     char* lastName;
     char* city;
     char* department;
-    bool isHacker;
-    char** desiredCourses;
-    char** friendsIds;
-    char** rivalsIds;
-
+    Hacker hacker;
 };
 
-typedef struct Students_t* Student;
+struct Hacker_t
+{
+    Student student;
+    int id;
+    int* courses;
+    int* friendsIds;
+    int* rivalsIds;
+};
+
 struct Courses_t
 {
-    char* courseNumber;
+    int courseNumber;
+    int courseSize;
     IsraeliQueue queue;
-    int size;
 };
-typedef struct Courses_t* Course;
 typedef struct Courses_t Courses_t;
+
 struct EnrollmentSystem_t{
     Student* students;
     Course* courses;
@@ -37,129 +47,14 @@ struct EnrollmentSystem_t{
 };
 //functions declerations
 typedef struct EnrollmentSystem_t EnrollmentSystem_t;
-Student* createStudentsArray(FILE* students, FILE* hackers);
-Course* createCoursesArray(FILE* courses);
-IsraeliQueue* createQueuesArray(FILE* courses);
-int findHowManyEnters(FILE* file);
-Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds);
-Student* createHackersArray(FILE* hackers);
-int howManySpaces(char* str);
-Course createCourse(char* courseNumber, int size);
 
-//functions
-EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers){
-    if(students == NULL || courses == NULL || hackers == NULL)
-    {
-        fclose(students);
-        fclose(courses);
-        fclose(hackers);
-        return NULL;
-    }
-    EnrollmentSystem system = malloc(sizeof(*system));
-    if(system == NULL)
-    {
-        return NULL;
-    }
-    system->students = createStudentsArray(students,hackers);
-    system->courses = createCoursesArray(courses);
-    system->hackers = createHackersArray(hackers);
-
-    return system;
-}
-Student* createHackersArray(FILE* hackers)
-{
-    int len = findHowManyEnters(hackers);
-    if(len == -1)
-    {
-        return NULL;
-    }
-    len = len/4;
-    Student* hackersArr = malloc(sizeof(struct Students_t)*len);
-    if(hackersArr == NULL)
-    {
-        return NULL;
-    }
-    char buffer[1024] = "";
-    for (int i = 0; i < len; ++i)
-    {
-        hackersArr[i] = createStudent(0,0,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-        fgets(buffer,1024,hackers);
-        sscanf(buffer,"%lld",&hackersArr[i]->id);
-        for(int j = 0; j < 3; j++)
-        {
-
-        }
-    }
-    return hackersArr;
-}
-
-int howManySpaces(char* str)
-{
-    int counter = 0;
-    for(int i = 0; str[i] != '\0'; i++)
-    {
-        if(str[i] == ' ')
-        {
-            counter++;
-        }
-    }
-    return counter;
-}
-Student* createStudentsArray(FILE* students, FILE* hackers)
-{
-    int len = findHowManyEnters(students);
-    if(len == -1)
-    {
-        return NULL;
-    }
-    Student* studentsArr = malloc(sizeof(struct Students_t)*len);
-    if(studentsArr == NULL)
-    {
-        return NULL;
-    }
-
-    char* id;
-    int totalCredits;
-    int GPA;
-    char* firstName;
-    char* lastName;
-    char* city;
-    char* department;
-
-    char buffer[1024] = "";
-    for(int i = 0; i<len; i++)
-    {
-
-        fgets(buffer,1024,students);
-        sscanf(buffer,"%lld %d %d %s %s %s %s",&id,&totalCredits,&GPA,firstName,lastName,city,department);
-        studentsArr[i] = createStudent(id,totalCredits,GPA,firstName,lastName,city,department,NULL,NULL,NULL);
-        if(studentsArr[i] == NULL)
-        {
-            return NULL;
-        }
-    }
-    return studentsArr;
-}
-
-
-Course* createCoursesArray(FILE* courses)
-{
-    int len = findHowManyEnters(courses);
-    if (len == -1)
-    {
-        return NULL;
-    }
-    Course* coursesArray = malloc(len * sizeof (Courses_t));
-    for (int i = 0; i < len; i++)
-    {
-        char* courseNumber;
-        int size;
-        fscanf(courses, "%s %d", courseNumber, &size);
-        coursesArray[i] = createCourse(courseNumber, size);
-    }
-    return coursesArray;
-}
-
+//Student* createStudentsArray(FILE* students);
+//Course* createCoursesArray(FILE* courses);
+//IsraeliQueue* createQueuesArray(FILE* courses);
+//int findHowManyEnters(FILE* file);
+//Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds);
+//Hacker * createHackersArray(FILE* hackers);
+//Course createCourse(int courseNumber, int size);
 
 int findHowManyEnters(FILE* file)
 {
@@ -179,20 +74,85 @@ int findHowManyEnters(FILE* file)
     }
     return counter;
 }
-EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
+
+int howManySpaces(const char* str)
 {
-    if(sys ==NULL || queues == NULL)
+    int counter = 0;
+    for(int i = 0; str[i] != '\0'; i++)
     {
-        return NULL;
+        if(str[i] == ' ')
+        {
+            counter++;
+        }
     }
-
-    return NULL;
-
+    return counter;
 }
 
-Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds)
+/**
+ *
+ * @param str
+ * @param len
+ * @return
+ */
+int* allocateIntsArrayFromLine(const char* str,int* len)
 {
-    if(firstName == NULL || lastName == NULL || city == NULL || department == NULL || desiredCourses == NULL || friendsIds == NULL || rivalsIds == NULL)
+    int cnt = 0;
+    int ret = 0;
+    int val = 0;
+    int bytesRead;
+    char* str0 = str;
+    ret = sscanf(str,"%d%n",&val, &bytesRead);
+    str+=bytesRead;
+    while(ret != EOF && ret != 0)
+    {
+        cnt++;
+        ret = sscanf(str,"%d%n",&val, &bytesRead);
+        str += bytesRead;
+    }
+    *len = cnt;
+    str = str0;
+
+    int* arr = malloc(sizeof(int) * (*len));
+    if(arr == NULL)
+    {
+        *len = 0;
+        return NULL;
+    }
+    for (int i = 0; i < (*len); ++i)
+    {
+        sscanf(str,"%d%n",&arr[i], &bytesRead);
+        str += bytesRead;
+    }
+
+    return arr;
+}
+
+//functions
+//EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers){
+//    if(students == NULL || courses == NULL || hackers == NULL)
+//    {
+//        fclose(students);
+//        fclose(courses);
+//        fclose(hackers);
+//        return NULL;
+//    }
+//    EnrollmentSystem system = malloc(sizeof(*system));
+//    if(system == NULL)
+//    {
+//        return NULL;
+//    }
+////    system->students = createStudentsArray(students,hackers);
+////    system->courses = createCoursesArray(courses);
+//    system->hackers = createHackersArray(hackers);
+//
+//    return system;
+//}
+
+
+
+Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
+{
+    if(firstName == NULL || lastName == NULL || city == NULL || department == NULL)
     {
         return NULL;
     }
@@ -208,13 +168,51 @@ Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char
     student->lastName = lastName;
     student->city = city;
     student->department = department;
-    student->desiredCourses = desiredCourses;
-    student->friendsIds = friendsIds;
-    student->rivalsIds = rivalsIds;
+    student->hacker = NULL;
+
     return student;
 }
 
-Course createCourse(char* courseNumber, int size)
+Student* createStudentsArray(FILE* students)
+{
+    int len = findHowManyEnters(students);
+    if(len == -1)
+    {
+        return NULL;
+    }
+    Student* studentsArr = malloc(sizeof(struct Student_t) * len);
+    if(studentsArr == NULL)
+    {
+        return NULL;
+    }
+
+    int id;
+    int totalCredits;
+    int GPA;
+    char* firstName;
+    char* lastName;
+    char* city;
+    char* department;
+    int num;
+
+    for(int i = 0; i<len; i++)
+    {
+        num = fscanf(students,"%d %d %d %ms %ms %ms %ms",&id,&totalCredits,&GPA,&firstName,&lastName,&city,&department); // TODO check if it works
+        assert(num == 7);
+        studentsArr[i] = createStudent(id,totalCredits,GPA,firstName,lastName,city,department);
+        if(studentsArr[i] == NULL)
+        {
+            return NULL;
+        }
+        free(firstName);
+        free(lastName);
+        free(city);
+        free(department);
+    }
+    return studentsArr;
+}
+
+Course createCourse(int courseNumber, int size)
 {
     if(courseNumber == NULL )
     {
@@ -226,9 +224,144 @@ Course createCourse(char* courseNumber, int size)
         return NULL;
     }
     course->courseNumber = courseNumber;
-    course->size = size;
+    course->courseSize = size;
     return course;
 }
+
+Course* createCoursesArray(FILE* courses)
+{
+    int len = findHowManyEnters(courses);
+    if (len == -1)
+    {
+        return NULL;
+    }
+    Course* coursesArray = malloc(len * sizeof (Courses_t));
+    for (int i = 0; i < len; i++)
+    {
+        int courseNumber;
+        int size;
+        int num;
+        num = fscanf(courses, "%d %d", &courseNumber, &size);
+        assert(num==2);
+        coursesArray[i] = createCourse(courseNumber, size);
+    }
+    return coursesArray;
+}
+
+Hacker createHacker(int id, const int* courses, int coursesLen, const int* friendsIds, int friendsLen, const int* rivalsIds, int rivalsLen)
+{
+    if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0 || friendsLen == 0 || rivalsLen == 0)
+    {
+        return NULL;
+    }
+
+    Hacker hacker = malloc(sizeof(*hacker));
+    if(hacker == NULL)
+    {
+        return NULL;
+    }
+    hacker->id = id;
+
+    hacker->courses = malloc(sizeof(*courses) * coursesLen);
+    if(hacker->courses == NULL)
+    {
+        return NULL;
+    }
+    memcpy(hacker->courses,courses,coursesLen);
+    hacker->friendsIds = malloc(sizeof(*friendsIds) * friendsLen);
+    if(hacker->friendsIds == NULL)
+    {
+        return NULL;
+    }
+    memcpy(hacker->friendsIds,friendsIds,friendsLen);
+
+    hacker->rivalsIds = malloc(sizeof(*rivalsIds) * rivalsLen);
+    if(hacker->rivalsIds == NULL)
+    {
+        return NULL;
+    }
+    memcpy(hacker->rivalsIds,rivalsIds,rivalsLen);
+
+    hacker->student = NULL;
+    return hacker;
+}
+
+Hacker* createHackersArray(FILE* hackers)
+{
+    int len = findHowManyEnters(hackers);
+    if(len == -1)
+    {
+        return NULL;
+    }
+    len = len/4;
+
+    Hacker* hackersArr = malloc(sizeof(struct Hacker_t) * len);
+
+    if(hackersArr == NULL)
+    {
+        return NULL;
+    }
+
+    int id;
+    int* coursesArr;
+    int coursesLen;
+    int* friendsArr;
+    int friendsLen;
+    int* rivalsArr;
+    int rivalsLen;
+
+    char* line = NULL;
+    for (int i = 0; i < len; ++i)
+    {
+        fscanf(hackers,"%d", &id);
+        fscanf(hackers,"%ms", &line);
+        coursesArr = allocateIntsArrayFromLine(line,&coursesLen);
+        free(line);
+        fscanf(hackers,"%ms", &line);
+        friendsArr = allocateIntsArrayFromLine(line,&friendsLen);
+        free(line);
+        fscanf(hackers,"%ms", &line);
+        rivalsArr = allocateIntsArrayFromLine(line,&rivalsLen);
+        free(line);
+        hackersArr[i] = createHacker(id,coursesArr,coursesLen,friendsArr,friendsLen,rivalsArr,rivalsLen);
+
+    }
+    return hackersArr;
+}
+
+void linkHackerToStudent(Hacker* hackersArr,int hackerLen, Student* studentsArr, int studentsLen)
+{
+    int studentIndex = 0;
+    for(int i = 0; i<hackerLen; i++)
+    {
+        while(studentIndex<studentsLen)
+        {
+            if(hackersArr[i]->id == studentsArr[studentIndex]->id)
+            {
+                hackersArr[i]->student = studentsArr[studentIndex];
+                studentsArr[studentIndex]->hacker = hackersArr[i];
+                break;
+            }
+            studentIndex++;
+        }
+    }
+}
+
+
+
+EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
+{
+    if(sys ==NULL || queues == NULL)
+    {
+        return NULL;
+    }
+
+    return NULL;
+
+}
+
+
+
 
 int IdsDiff(long long id1, long long id2)
 {

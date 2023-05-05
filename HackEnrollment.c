@@ -43,7 +43,7 @@ typedef struct Courses_t Courses_t;
 struct EnrollmentSystem_t{
     Student* students;
     Course* courses;
-    Student* hackers;
+    Hacker* hackers;
 };
 //functions declerations
 typedef struct EnrollmentSystem_t EnrollmentSystem_t;
@@ -72,6 +72,7 @@ int findHowManyEnters(FILE* file)
         }
         c = fgetc(file);
     }
+    rewind(file);
     return counter;
 }
 
@@ -141,11 +142,11 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 //    {
 //        return NULL;
 //    }
-////    system->students = createStudentsArray(students,hackers);
-////    system->courses = createCoursesArray(courses);
+//    system->students = createStudentsArray(students,hackers);
+//    system->courses = createCoursesArray(courses);
 //    system->hackers = createHackersArray(hackers);
 //
-//    return system;
+///    return system;
 //}
 
 
@@ -173,14 +174,14 @@ Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* 
     return student;
 }
 
-Student* createStudentsArray(FILE* students)
+Student* createStudentsArray(FILE* students, int* len)
 {
-    int len = findHowManyEnters(students);
-    if(len == -1)
+    *len = findHowManyEnters(students);
+    if(*len == -1)
     {
         return NULL;
     }
-    Student* studentsArr = malloc(sizeof(struct Student_t) * len);
+    Student* studentsArr = malloc(sizeof(struct Student_t) * (*len));
     if(studentsArr == NULL)
     {
         return NULL;
@@ -195,7 +196,7 @@ Student* createStudentsArray(FILE* students)
     char* department;
     int num;
 
-    for(int i = 0; i<len; i++)
+    for(int i = 0; i<(*len); i++)
     {
         num = fscanf(students,"%d %d %d %ms %ms %ms %ms",&id,&totalCredits,&GPA,&firstName,&lastName,&city,&department); // TODO check if it works
         assert(num == 7);
@@ -228,15 +229,15 @@ Course createCourse(int courseNumber, int size)
     return course;
 }
 
-Course* createCoursesArray(FILE* courses)
+Course* createCoursesArray(FILE* courses, int* len)
 {
-    int len = findHowManyEnters(courses);
-    if (len == -1)
+    *len = findHowManyEnters(courses);
+    if (*len == -1)
     {
         return NULL;
     }
-    Course* coursesArray = malloc(len * sizeof (Courses_t));
-    for (int i = 0; i < len; i++)
+    Course* coursesArray = malloc((*len) * sizeof (Courses_t));
+    for (int i = 0; i < (*len); i++)
     {
         int courseNumber;
         int size;
@@ -286,16 +287,16 @@ Hacker createHacker(int id, const int* courses, int coursesLen, const int* frien
     return hacker;
 }
 
-Hacker* createHackersArray(FILE* hackers)
+Hacker* createHackersArray(FILE* hackers, int *len)
 {
-    int len = findHowManyEnters(hackers);
-    if(len == -1)
+    *len = findHowManyEnters(hackers);
+    if(*len == -1)
     {
         return NULL;
     }
-    len = len/4;
+    (*len) = (*len)/4;
 
-    Hacker* hackersArr = malloc(sizeof(struct Hacker_t) * len);
+    Hacker* hackersArr = malloc(sizeof(struct Hacker_t) * (*len));
 
     if(hackersArr == NULL)
     {
@@ -311,7 +312,7 @@ Hacker* createHackersArray(FILE* hackers)
     int rivalsLen;
 
     char* line = NULL;
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < (*len); ++i)
     {
         fscanf(hackers,"%d", &id);
         fscanf(hackers,"%ms", &line);
@@ -347,7 +348,38 @@ void linkHackerToStudent(Hacker* hackersArr,int hackerLen, Student* studentsArr,
     }
 }
 
-
+EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
+{
+    if(students == NULL || courses == NULL || hackers == NULL)
+    {
+        if(students != NULL)
+        {
+            fclose(students);
+        }
+        if(courses != NULL)
+        {
+            fclose(courses);
+        }
+        if(hackers != NULL)
+        {
+            fclose(hackers);
+        }
+        return NULL;
+    }
+    EnrollmentSystem sys = malloc(sizeof(*sys));
+    if(sys == NULL)
+    {
+        return NULL;
+    }
+    int studentsLen;
+    int coursesLen;
+    int hackersLen;
+    sys->students = createStudentsArray(students,&studentsLen);
+    sys->courses = createCoursesArray(courses,&coursesLen);
+    sys->hackers = createHackersArray(hackers,&hackersLen);
+    linkHackerToStudent(sys->hackers,hackersLen,sys->students,studentsLen);
+    return sys;
+}
 
 EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
 {

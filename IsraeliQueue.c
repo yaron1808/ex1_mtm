@@ -534,7 +534,7 @@ int FindTheRivalry_thForTheMergeFnction (int rivalry_th, int numOfQueue)
     while(exponent < rivalry_th)
     {
         x++;
-        int exponent = 1;
+        exponent = 1;
         for(int i = 0; i < numOfQueue; i++){
             exponent = exponent * x;
         }

@@ -104,7 +104,7 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
     int ret = 0;
     int val = 0;
     int bytesRead;
-    char* str0 = str;
+    const char* str0 = str;
     ret = sscanf(str,"%d%n",&val, &bytesRead);
     str+=bytesRead;
     while(ret != EOF && ret != 0)
@@ -159,6 +159,23 @@ Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* 
     return student;
 }
 
+void destroyStudent(Student student)
+{
+    if(student == NULL)
+    {
+        return;
+    }
+    free(student->firstName);
+    free(student->lastName);
+    free(student->city);
+    free(student->department);
+    if(student->hacker != NULL)
+    {
+        student->hacker->student = NULL;
+    }
+    free(student);
+}
+
 Student* createStudentsArray(FILE* students, int* len)
 {
     *len = findHowManyEnters(students);
@@ -190,12 +207,21 @@ Student* createStudentsArray(FILE* students, int* len)
         {
             return NULL;
         }
-        //free(firstName);
-        //free(lastName);
-        //free(city);
-        //free(department);
     }
     return studentsArr;
+}
+
+void destroyStudentsArray(Student* students, int len)
+{
+    if(students == NULL)
+    {
+        return;
+    }
+    for(int i = 0; i<len; i++)
+    {
+        destroyStudent(students[i]);
+    }
+    free(students);
 }
 
 Course createCourse(int courseNumber, int size)
@@ -209,6 +235,16 @@ Course createCourse(int courseNumber, int size)
     course->courseSize = size;
     course->queue = NULL;
     return course;
+}
+
+void destroyCourse(Course course)
+{
+    if(course == NULL)
+    {
+        return;
+    }
+    IsraeliQueueDestroy(course->queue);
+    free(course);
 }
 
 Course* createCoursesArray(FILE* courses, int* len)
@@ -231,7 +267,20 @@ Course* createCoursesArray(FILE* courses, int* len)
     return coursesArray;
 }
 
-Hacker createHacker(int id, const int* courses, int coursesLen, const int* friendsIds, int friendsLen, const int* rivalsIds, int rivalsLen)
+void destroyCoursesArray(Course* courses, int len)
+{
+    if(courses == NULL)
+    {
+        return;
+    }
+    for(int i = 0; i<len; i++)
+    {
+        destroyCourse(courses[i]);
+    }
+    free(courses);
+}
+
+Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int friendsLen, int* rivalsIds, int rivalsLen)
 {
     if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0 || friendsLen == 0 || rivalsLen == 0)
     {
@@ -253,6 +302,22 @@ Hacker createHacker(int id, const int* courses, int coursesLen, const int* frien
     hacker->rivalsLen = rivalsLen;
     hacker->student = NULL;
     return hacker;
+}
+
+void destroyHacker(Hacker hacker)
+{
+    if(hacker == NULL)
+    {
+        return;
+    }
+    free(hacker->courses);
+    free(hacker->friendsIds);
+    free(hacker->rivalsIds);
+    if(hacker->student != NULL)
+    {
+        hacker->student->hacker = NULL;
+    }
+    free(hacker);
 }
 
 Hacker* createHackersArray(FILE* hackers, int *len)
@@ -298,6 +363,19 @@ Hacker* createHackersArray(FILE* hackers, int *len)
     return hackersArr;
 }
 
+void destroyHackersArray(Hacker* hackers, int len)
+{
+    if(hackers == NULL)
+    {
+        return;
+    }
+    for(int i = 0; i<len; i++)
+    {
+        destroyHacker(hackers[i]);
+    }
+    free(hackers);
+}
+
 void linkHackerToStudent(Hacker* hackersArr,int hackerLen, Student* studentsArr, int studentsLen)
 {
     int studentIndex = 0;
@@ -333,6 +411,10 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
     sys->students = createStudentsArray(students,&studentsLen);
     sys->courses = createCoursesArray(courses,&coursesLen);
     sys->hackers = createHackersArray(hackers,&hackersLen);
+    if(sys->students == NULL || sys->courses == NULL || sys->hackers == NULL)
+    {
+        return NULL;
+    }
     linkHackerToStudent(sys->hackers,hackersLen,sys->students,studentsLen);
     return sys;
 }

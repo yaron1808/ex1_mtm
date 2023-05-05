@@ -28,8 +28,11 @@ struct Hacker_t
     Student student;
     int id;
     int* courses;
+    int coursesLen;
     int* friendsIds;
+    int friendsLen;
     int* rivalsIds;
+    int rivalsLen;
 };
 
 struct Courses_t
@@ -129,27 +132,9 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 }
 
 //functions
-//EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers){
-//    if(students == NULL || courses == NULL || hackers == NULL)
-//    {
-//        fclose(students);
-//        fclose(courses);
-//        fclose(hackers);
-//        return NULL;
-//    }
-//    EnrollmentSystem system = malloc(sizeof(*system));
-//    if(system == NULL)
-//    {
-//        return NULL;
-//    }
-//    system->students = createStudentsArray(students,hackers);
-//    system->courses = createCoursesArray(courses);
-//    system->hackers = createHackersArray(hackers);
-//
-///    return system;
-//}
 
 
+//TODO: implement destory functions
 
 Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
 {
@@ -205,10 +190,10 @@ Student* createStudentsArray(FILE* students, int* len)
         {
             return NULL;
         }
-        free(firstName);
-        free(lastName);
-        free(city);
-        free(department);
+        //free(firstName);
+        //free(lastName);
+        //free(city);
+        //free(department);
     }
     return studentsArr;
 }
@@ -222,6 +207,7 @@ Course createCourse(int courseNumber, int size)
     }
     course->courseNumber = courseNumber;
     course->courseSize = size;
+    course->queue = NULL;
     return course;
 }
 
@@ -259,26 +245,12 @@ Hacker createHacker(int id, const int* courses, int coursesLen, const int* frien
     }
     hacker->id = id;
 
-    hacker->courses = malloc(sizeof(*courses) * coursesLen);
-    if(hacker->courses == NULL)
-    {
-        return NULL;
-    }
-    memcpy(hacker->courses,courses,coursesLen);
-    hacker->friendsIds = malloc(sizeof(*friendsIds) * friendsLen);
-    if(hacker->friendsIds == NULL)
-    {
-        return NULL;
-    }
-    memcpy(hacker->friendsIds,friendsIds,friendsLen);
-
-    hacker->rivalsIds = malloc(sizeof(*rivalsIds) * rivalsLen);
-    if(hacker->rivalsIds == NULL)
-    {
-        return NULL;
-    }
-    memcpy(hacker->rivalsIds,rivalsIds,rivalsLen);
-
+    hacker->courses = courses;
+    hacker->coursesLen = coursesLen;
+    hacker->friendsIds = friendsIds;
+    hacker->friendsLen = friendsLen;
+    hacker->rivalsIds = rivalsIds;
+    hacker->rivalsLen = rivalsLen;
     hacker->student = NULL;
     return hacker;
 }
@@ -348,18 +320,6 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
 {
     if(students == NULL || courses == NULL || hackers == NULL)
     {
-        if(students != NULL)
-        {
-            fclose(students);
-        }
-        if(courses != NULL)
-        {
-            fclose(courses);
-        }
-        if(hackers != NULL)
-        {
-            fclose(hackers);
-        }
         return NULL;
     }
     EnrollmentSystem sys = malloc(sizeof(*sys));

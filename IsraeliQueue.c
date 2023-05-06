@@ -186,15 +186,20 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue queue, void *item)
  */
 bool isRivals(IsraeliQueue queue, Node_t* node1, Node_t* node2)
 {
-    double avg =0;
+    double avg = 0;
     int i = 0;
     while(queue->friendsFunctions[i]!=NULL)
     {
-        avg+=queue->friendsFunctions[i](node1->data,node2->data);
+        int a = queue->friendsFunctions[i](node1->data,node2->data);
+        if(a > queue->friendship_th)
+        {
+            return false;
+        }
+        avg+=a;
         i++;
     }
     avg = avg/i;
-    return (!isFriends(queue,node1,node2)) && (avg<queue->rivalry_th);
+    return  (avg < queue->rivalry_th);
 }
 /**
  *
@@ -208,7 +213,7 @@ bool isFriends(IsraeliQueue queue, Node_t* node1, Node_t* node2)
     int i = 0;
     while (queue->friendsFunctions[i]!=NULL)
     {
-        if(queue->friendsFunctions[i](node1->data,node2->data)>queue->friendship_th)
+        if(queue->friendsFunctions[i](node1->data,node2->data) > queue->friendship_th)
         {
             return true;
         }
@@ -413,7 +418,7 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
             nodeRival = nodeFriend->next;
             while(nodeRival != NULL)
             {
-                if(nodeFriend->rivals < RIVAL_QUOTA && isRivals(queue, nodeFriend, newNode))
+                if(nodeRival->rivals < RIVAL_QUOTA && isRivals(queue, nodeRival, newNode))
                 {
                     nodeRival->rivals++;
                     nodeFriend = nodeRival->next;

@@ -527,11 +527,13 @@ int nameDiff(const char* firstName1, const char* firstName2, const char* lastNam
         firstNameDiff+=ABS(firstName1[i]-firstName2[i]);
         i++;
     }
+    int j = i;
     while (firstName1[i])
     {
         firstNameDiff+=firstName1[i];
         i++;
     }
+    i=j;
     while (firstName2[i])
     {
         firstNameDiff+=firstName2[i];
@@ -544,11 +546,13 @@ int nameDiff(const char* firstName1, const char* firstName2, const char* lastNam
         lastNameDiff+=ABS(lastName1[i] - lastName2[i]);
         i++;
     }
+    j=i;
     while (lastName1[i])
     {
         lastNameDiff+=lastName1[i];
         i++;
     }
+    i=j;
     while (lastName2[i])
     {
         lastNameDiff+=lastName2[i];
@@ -667,6 +671,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
         //Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
         fprintf(tempEnrollment, "\n");
     }
+
     fclose(tempEnrollment);
 
 }

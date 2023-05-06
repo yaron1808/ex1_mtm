@@ -45,8 +45,11 @@ typedef struct Courses_t Courses_t;
 
 struct EnrollmentSystem_t{
     Student* students;
+    int studentsLen;
     Course* courses;
+    int coursesLen;
     Hacker* hackers;
+    int hackersLen;
 };
 //functions declerations
 typedef struct EnrollmentSystem_t EnrollmentSystem_t;
@@ -347,14 +350,14 @@ Hacker* createHackersArray(FILE* hackers, int *len)
     char* line = NULL;
     for (int i = 0; i < (*len); ++i)
     {
-        fscanf(hackers,"%d", &id);
-        fscanf(hackers,"%ms", &line);
+        fscanf(hackers,"%d\n", &id);
+        fscanf(hackers,"%m[^\n]\n", &line);
         coursesArr = allocateIntsArrayFromLine(line,&coursesLen);
         free(line);
-        fscanf(hackers,"%ms", &line);
+        fscanf(hackers,"%m[^\n]\n", &line);
         friendsArr = allocateIntsArrayFromLine(line,&friendsLen);
         free(line);
-        fscanf(hackers,"%ms", &line);
+        fscanf(hackers,"%m[^\n]\n", &line);
         rivalsArr = allocateIntsArrayFromLine(line,&rivalsLen);
         free(line);
         hackersArr[i] = createHacker(id,coursesArr,coursesLen,friendsArr,friendsLen,rivalsArr,rivalsLen);
@@ -415,8 +418,50 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
     {
         return NULL;
     }
+    sys->studentsLen = studentsLen;
+    sys->coursesLen = coursesLen;
+    sys->hackersLen = hackersLen;
     linkHackerToStudent(sys->hackers,hackersLen,sys->students,studentsLen);
     return sys;
+}
+
+int compareFunction(void* p1, void* p2)
+{
+//    Student s1 = (Student)p1;
+//    Student s2 = (Student)p2;
+//    if(s1->id > s2->id)
+//    {
+//        return 1;
+//    }
+//    if(s1->id < s2->id)
+//    {
+//        return -1;
+//    }
+    return 0;
+}
+
+Course findCourseByCourseNum(EnrollmentSystem sys, int courseNum)
+{
+    for (int i = 0; i < sys->coursesLen; ++i)
+    {
+        if(sys->courses[i]->courseNumber == courseNum)
+        {
+            return sys->courses[i];
+        }
+    }
+    return NULL;
+}
+
+Student findStudentById(EnrollmentSystem sys, int id)
+{
+    for (int i = 0; i < sys->studentsLen; ++i)
+    {
+        if(sys->students[i]->id == id)
+        {
+            return sys->students[i];
+        }
+    }
+    return NULL;
 }
 
 EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
@@ -425,15 +470,45 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
     {
         return NULL;
     }
+    FriendshipFunction friendFunctions[] = {NULL};
+    for (int i = 0; i < sys->coursesLen; ++i)
+    {
+        sys->courses[i]->queue = IsraeliQueueCreate(friendFunctions,compareFunction,FRIENDSHIP_THRESHOLD,RIVALRY_THRESHOLD);
+        if(sys->courses[i]->queue == NULL)
+        {
+            return NULL;
+        }
+    }
 
-    return NULL;
+    char* line = NULL;
+    int ret = fscanf(queues,"%m[^\n]\n",&line);
+    while(line!=NULL && ret!= 0 && ret !=EOF)
+    {
+        int len;
+        int* id = allocateIntsArrayFromLine(line,&len);
+        if(id == NULL)
+        {
+            return NULL;
+        }
+        free(line);
 
+        int courseNum = id[0];
+        IsraeliQueue q = findCourseByCourseNum(sys,courseNum)->queue;
+        for (int i = 1; i < len; ++i)
+        {
+            IsraeliQueueEnqueue(q, findStudentById(sys,id[i]));
+        }
+        free(id);
+        fscanf(queues,"%m[^\n]\n",&line);
+    }
+
+    return sys;
 }
 
 
 
 
-int IdsDiff(long long id1, long long id2)
+int IdsDiff(int id1, int id2)
 {
     return ABS(id1-id2);
 }

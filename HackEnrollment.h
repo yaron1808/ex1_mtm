@@ -1,6 +1,7 @@
 #ifndef HACKENROLLMENT_H
 #define HACKENROLLMENT_H
 #include <stdio.h>
+#include <stdbool.h>
 
 #define FRIENDSHIP_THRESHOLD 20
 #define RIVALRY_THRESHOLD 0
@@ -21,5 +22,7 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers);
 EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues);
 
 void hackEnrollment(EnrollmentSystem sys, FILE* out);
+
+void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive);
 
 #endif //HACKENROLLMENT_H

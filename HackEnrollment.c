@@ -675,3 +675,29 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
     fclose(tempEnrollment);
 
 }
+
+void stringToUpper(char* str)
+{
+    int i = 0;
+    while(str[i])
+    {
+        str[i] = (str[i] >= 'a' && str[i] <= 'z') ? str[i] - ('a'-'A') : str[i];
+        i++;
+    }
+}
+
+void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive)
+{
+    if(sys == NULL)
+    {
+        return;
+    }
+    if(caseSensitive)
+    {
+        for (int i = 0; i < sys->studentsLen; ++i)
+        {
+            stringToUpper(sys->students[i]->firstName);
+            stringToUpper(sys->students[i]->lastName);
+        }
+    }
+}

@@ -1,51 +1,46 @@
 #include "IsraeliQueue.h"
+#include "HackEnrollment.h"
 #include <stdio.h>
-int comparison_function_mock(void *obj1, void *obj2) {
-    int id1 = *(int *)obj1;
-    int id2 = *(int *)obj2;
 
-    return id1 - id2;
-}
-int mockfriendshipfunction(void* firstObject, void* secondObject){
-    int temp = (*(int*)firstObject)+(*(int*)firstObject)+50;
-    return temp;
+int friend1(void* a, void* b){
+    int aa = *(int*)a;
+    int bb = *(int*)b;
+    return aa;
+
 }
 
+int friend2(void* a, void* b){
+    int aa = *(int*)a;
+    int bb = *(int*)b;
+    return bb;
 
-int main(){
-    // test 1
+}
 
-    /* iterations:
-    1 2 3 4 5 6 7 8 9 10 11 12 <-original
-    1 12 2 3 4 5 6 7 8 9 10 11
-    1 11 12 2 3 4 5 6 7 8 9 10
-    1 10 11 12 2 3 4 5 6 7 8 9
-    1 9 10 11 12 2 3 4 5 6 7 8
-    1 8 9 10 11 12 2 3 4 5 6 7
-    1 8 7 9 10 11 12 2 3 4 5 6
-    1 8 6 7 9 10 11 12 2 3 4 5
-    1 8 5 6 7 9 10 11 12 2 3 4
-    1 8 4 5 6 7 9 10 11 12 2 3
-    1 8 3 4 5 6 7 9 10 11 12 2
-    1 8 3 2 4 5 6 7 9 10 11 12
-    8 3 1 2 4 5 6 7 9 10 11 12
-
-     */
-    int arr[]={1,2,3,4,5,6,7,8,9,10,11,12};
-    FriendshipFunction functions[]={mockfriendshipfunction,NULL};
-    IsraeliQueue queue=IsraeliQueueCreate(functions, comparison_function_mock, 0, 0);
-
-    for (int i=0; i<12; i++){
-        IsraeliQueueEnqueue(queue, &arr[i]);
-
+int compare(void* a, void* b){
+    int aa = *(int*)a;
+    int bb = *(int*)b;
+    if(aa == bb){
+        return 1;
     }
-    IsraeliQueueImprovePositions(queue);
-    //dequeue
-    for (int i = 0; i < 12; ++i) {
-        int* num = (int*)IsraeliQueueDequeue(queue);
-        printf("%d, ", *num);
-    }
-    printf("\n");
-    printf("size: %d\n", IsraeliQueueSize(queue));
 
+    return 0;
+}
+
+int main()
+{
+   FILE* courses = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\courses.txt", "r");
+   FILE* students = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\students.txt", "r");
+   FILE* hackers = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\hackers.txt", "r");
+   FILE* queues = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\queues.txt", "r");
+
+    if(students == NULL || courses == NULL || hackers == NULL){
+        return 0;
+    }
+    EnrollmentSystem sys = createEnrollment(students, courses, hackers);
+    readEnrollment(sys, queues);
+    fclose(students);
+    fclose(courses);
+    fclose(hackers);
+    fclose(queues);
+    return 0;
 }

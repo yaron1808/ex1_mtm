@@ -4,6 +4,9 @@
 
 #define FRIENDSHIP_THRESHOLD 20
 #define RIVALRY_THRESHOLD 0
+#define FRIENDS 20
+#define RIVALS (-20)
+#define NO_RELATION 0
 
 typedef struct EnrollmentSystem_t* EnrollmentSystem;
 /**

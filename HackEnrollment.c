@@ -33,6 +33,7 @@ struct Hacker_t
     int friendsLen;
     int* rivalsIds;
     int rivalsLen;
+    int coursesEnrolled;
 };
 
 struct Courses_t
@@ -303,6 +304,7 @@ Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int f
     hacker->friendsLen = friendsLen;
     hacker->rivalsIds = rivalsIds;
     hacker->rivalsLen = rivalsLen;
+    hacker->coursesEnrolled = 0;
     hacker->student = NULL;
     return hacker;
 }
@@ -427,17 +429,7 @@ EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
 
 int compareFunction(void* p1, void* p2)
 {
-//    Student s1 = (Student)p1;
-//    Student s2 = (Student)p2;
-//    if(s1->id > s2->id)
-//    {
-//        return 1;
-//    }
-//    if(s1->id < s2->id)
-//    {
-//        return -1;
-//    }
-    return 0;
+    return (int)(p1==p2);
 }
 
 Course findCourseByCourseNum(EnrollmentSystem sys, int courseNum)
@@ -513,7 +505,19 @@ int IdsDiff(int id1, int id2)
     return ABS(id1-id2);
 }
 
-int nameDiff(const char* firstName1, const char* firstName2, const char* lastName1, const char* lastName)
+int friendshipFunc3(void* item1, void* item2)
+{
+    Student student1 = (Student)item1;
+    Student student2 = (Student)item2;
+    if(student1->hacker == NULL && student2->hacker == NULL)
+    {
+        return NO_RELATION;
+    }
+    return IdsDiff(student1->id,student2->id);
+
+}
+
+int nameDiff(const char* firstName1, const char* firstName2, const char* lastName1, const char* lastName2)
 {
     int firstNameDiff = 0;
     int lastNameDiff = 0;
@@ -535,9 +539,9 @@ int nameDiff(const char* firstName1, const char* firstName2, const char* lastNam
     }
 
     i = 0;
-    while(lastName1[i] && lastName[i])
+    while(lastName1[i] && lastName2[i])
     {
-        lastNameDiff+=ABS(lastName1[i]-lastName[i]);
+        lastNameDiff+=ABS(lastName1[i] - lastName2[i]);
         i++;
     }
     while (lastName1[i])
@@ -545,11 +549,124 @@ int nameDiff(const char* firstName1, const char* firstName2, const char* lastNam
         lastNameDiff+=lastName1[i];
         i++;
     }
-    while (lastName[i])
+    while (lastName2[i])
     {
-        lastNameDiff+=lastName[i];
+        lastNameDiff+=lastName2[i];
         i++;
     }
     return firstNameDiff+lastNameDiff;
 }
 
+int friendshipFunc2(void* item1, void* item2)
+{
+    Student student1 = (Student)item1;
+    Student student2 = (Student)item2;
+    if(student1->hacker == NULL && student2->hacker == NULL)
+    {
+        return NO_RELATION;
+    }
+    return nameDiff(student1->firstName,student2->firstName,student1->lastName,student2->lastName);
+}
+
+int friendShipHackerStudent(Student student, Hacker hacker)
+{
+    for (int i = 0; i < hacker->friendsLen; ++i)
+    {
+        if(hacker->friendsIds[i] == student->id)
+        {
+            return FRIENDS;
+        }
+    }
+
+    for (int i = 0; i < hacker->rivalsLen; ++i)
+    {
+        if(hacker->rivalsIds[i] == student->id)
+        {
+            return RIVALS;
+        }
+    }
+    return NO_RELATION;
+}
+
+int friendshipFunc1(void* item1, void* item2)
+{
+    Student student1 = (Student)item1;
+    Student student2 = (Student)item2;
+
+    if(student1->hacker == NULL && student2->hacker == NULL)
+    {
+        return NO_RELATION;
+    }
+    int result = NO_RELATION;
+    if(student1->hacker != NULL)
+    {
+        result = friendShipHackerStudent(student2, student1->hacker);
+    }
+
+    if(result == 0 && student2->hacker != NULL)
+    {
+        result = friendShipHackerStudent(student1, student2->hacker);
+    }
+    return result;
+
+
+}
+bool IsInArray(int* arr, int len, int num)
+{
+    for (int i = 0; i < len; ++i)
+    {
+        if(arr[i] == num)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int findHackerPositionInQueue(IsraeliQueue queue, Hacker hacker)
+{
+
+}
+void hackEnrollment(EnrollmentSystem sys, FILE* out)
+{
+    if(sys == NULL || out == NULL)
+    {
+        return;
+    }
+
+    for (int i = 0; i < sys->coursesLen; ++i)
+    {
+        IsraeliQueueAddFriendshipMeasure(sys->courses[i]->queue, friendshipFunc1);
+        IsraeliQueueAddFriendshipMeasure(sys->courses[i]->queue, friendshipFunc2);
+        IsraeliQueueAddFriendshipMeasure(sys->courses[i]->queue, friendshipFunc3);
+        for (int j = 0; j < sys->hackersLen; ++j)
+        {
+            if(IsInArray(sys->hackers[j]->courses,sys->hackers[j]->coursesLen,sys->courses[i]->courseNumber))
+            {
+                IsraeliQueueEnqueue(sys->courses[i]->queue,sys->hackers[j]->student);
+            }
+        }
+
+    }
+
+    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\temp.txt","w");
+    if(tempEnrollment == NULL)
+    {
+        return;
+    }
+
+    for (int i = 0; i < sys->coursesLen; ++i)
+    {
+        fprintf(tempEnrollment, "%d ",sys->courses[i]->courseNumber);
+        int queueSize = IsraeliQueueSize(sys->courses[i]->queue);
+        for (int j = 0; j < queueSize; ++j)
+        {
+            Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
+            fprintf(tempEnrollment, "%d ", student->id);
+        }
+        //Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
+        fprintf(tempEnrollment, "\n");
+    }
+    fclose(tempEnrollment);
+
+}

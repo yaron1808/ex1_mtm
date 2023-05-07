@@ -661,7 +661,8 @@ int findHackerPositionInQueue(IsraeliQueue queue, Hacker hacker)
 
 void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
 {
-    for (int i = 1; i < len && i < sys->courses[0]->courseSize; ++i)
+    Course currentCourse = findCourseByCourseNum(sys, id[0]);
+    for (int i = 1; i < len && i < currentCourse->courseSize; ++i)
     {
         if(findStudentById(sys,id[i])->hacker!=NULL)
         {
@@ -750,10 +751,12 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
         if(sys->hackers[i]->coursesEnrolled <= MIN_COURSES && sys->hackers[i]->coursesLen > 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
+            return;
         }
         if(sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
+            return;
         }
     }
 

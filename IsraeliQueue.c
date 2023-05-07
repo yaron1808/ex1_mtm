@@ -97,7 +97,7 @@ int friendsArraySize(FriendshipFunction* friendsArr)
  */
 void copyFunctionToArray(FriendshipFunction* source, FriendshipFunction* dest)
 {
-    //assert(friendsArraySize(source) <= friendsArraySize(dest));
+    assert(friendsArraySize(source) <= friendsArraySize(dest));
 
     for(int i = 0; i< friendsArraySize(source);i++)
     {
@@ -422,7 +422,7 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
                 {
                     nodeRival->rivals++;
                     nodeFriend = nodeRival;
-                    break;//will miss one node
+                    break;
                 }
                 nodeRival=nodeRival->next;
             }

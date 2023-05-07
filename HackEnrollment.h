@@ -8,7 +8,7 @@
 #define FRIENDS 20
 #define RIVALS (-20)
 #define NO_RELATION 0
-
+#define MIN_COURSES 2
 typedef struct EnrollmentSystem_t* EnrollmentSystem;
 /**
  *

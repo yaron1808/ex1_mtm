@@ -631,6 +631,27 @@ int findHackerPositionInQueue(IsraeliQueue queue, Hacker hacker)
 {
 
 }
+
+void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
+{
+    for (int i = 1; i < len && i < sys->courses[0]->courseSize; ++i)
+    {
+        if(findStudentById(sys,id[i])->hacker!=NULL)
+        {
+            findStudentById(sys,id[i])->hacker->coursesEnrolled++;
+        }
+    }
+}
+
+void copyFile(FILE* src, FILE* dst)
+{
+    char letter;
+    while((letter = fgetc(src)) != EOF)
+    {
+        fputc(letter, dst);
+    }
+}
+
 void hackEnrollment(EnrollmentSystem sys, FILE* out)
 {
     if(sys == NULL || out == NULL)
@@ -661,19 +682,51 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     for (int i = 0; i < sys->coursesLen; ++i)
     {
-        fprintf(tempEnrollment, "%d ",sys->courses[i]->courseNumber);
         int queueSize = IsraeliQueueSize(sys->courses[i]->queue);
-        for (int j = 0; j < queueSize; ++j)
+        if(queueSize == 1)
+        {
+            continue;
+        }
+        fprintf(tempEnrollment, "%d ",sys->courses[i]->courseNumber);
+        for (int j = 0; j < queueSize - 1; ++j)
         {
             Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
             fprintf(tempEnrollment, "%d ", student->id);
         }
-        //Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
-        fprintf(tempEnrollment, "\n");
+        Student student = (Student) IsraeliQueueDequeue(sys->courses[i]->queue);
+        if(student != NULL)
+        {
+            fprintf(tempEnrollment, "%d\n", student->id);
+        }
+        else
+        {
+            fprintf(tempEnrollment, "\n");
+        }
+    }
+    char* line;
+    int ret = fscanf(tempEnrollment,"%m[^\n]\n",&line);
+    int len;
+    while(line!=NULL && ret!= 0 && ret !=EOF)
+    {
+        int* id = allocateIntsArrayFromLine(line,&len);
+        updateHackerEnrollment(sys,id,len);
+        free(id);
+        free(line);
+        ret = fscanf(tempEnrollment,"%m[^\n]\n",&line);
     }
 
-    fclose(tempEnrollment);
 
+    for (int i = 0; i < sys->hackersLen; ++i)
+    {
+        if(sys->hackers[i]->coursesEnrolled <= MIN_COURSES)
+        {
+            fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
+        }
+    }
+
+    copyFile(tempEnrollment,out);
+    fclose(tempEnrollment);
+    remove("temp.txt");
 }
 
 void stringToUpper(char* str)

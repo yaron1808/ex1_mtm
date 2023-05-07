@@ -83,3 +83,9 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue);
 IsraeliQueue IsraeliQueueMerge(IsraeliQueue*,ComparisonFunction);
 
 #endif //PROVIDED_ISRAELIQUEUE_H
+
+
+void printIntObjectsOfQueue (IsraeliQueue queue);//remove
+void printFriend_th (IsraeliQueue queue);//remove
+void printSizeOfFriendFunction (IsraeliQueue queue);//remove
+bool checkingIfThisIsTheRightArray (IsraeliQueue queue, FriendshipFunction* friendsArray);

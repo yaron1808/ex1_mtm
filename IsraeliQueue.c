@@ -421,8 +421,8 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
                 if(nodeRival->rivals < RIVAL_QUOTA && isRivals(queue, nodeRival, newNode))
                 {
                     nodeRival->rivals++;
-                    nodeFriend = nodeRival->next;
-                    break;
+                    nodeFriend = nodeRival;
+                    break;//will miss one node
                 }
                 nodeRival=nodeRival->next;
             }
@@ -460,8 +460,8 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue* israeliQueueArray ,ComparisonFuncti
     {
         friendship_th = friendship_th + israeliQueueArray[numOfQueue] -> friendship_th;
         rivalry_th = rivalry_th * israeliQueueArray[numOfQueue] -> rivalry_th;
-        numOfQueue++;
         sizeOfFriendshipArray = sizeOfFriendshipArray + friendsArraySize (israeliQueueArray[numOfQueue] -> friendsFunctions);
+        numOfQueue++;
 
     }
     friendship_th = FindTheFriendship_thForTheMergeFnction (friendship_th, numOfQueue);
@@ -607,3 +607,38 @@ void IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nod
 
 }
 
+void printIntObjectsOfQueue (IsraeliQueue queue)//remove
+{
+    Node_t* currentNode = queue -> head;
+    while (currentNode)
+    {
+        printf("%d ,", *(int*)currentNode->data);
+        currentNode = currentNode->next;
+    }
+}
+
+void printFriend_th (IsraeliQueue queue) //remove
+{
+    printf("the friend_th %d\n", queue ->friendship_th);
+    printf("the rivalry_th %d\n", queue ->rivalry_th);
+
+}
+void printSizeOfFriendFunction (IsraeliQueue queue) //remove
+{
+
+    int size = friendsArraySize(queue->friendsFunctions);
+    printf("friends array size is %d\n", size);
+}
+bool checkingIfThisIsTheRightArray (IsraeliQueue queue, FriendshipFunction* friendsArray)
+{
+    int i = 0;
+    while(friendsArray[i])
+    {
+        if(friendsArray[i] != queue ->friendsFunctions[i])
+        {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}

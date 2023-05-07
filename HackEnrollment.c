@@ -96,33 +96,77 @@ int howManySpaces(const char* str)
     return counter;
 }
 
+//char* readLineFromFile(FILE* file)
+//{
+//    if(file == NULL)
+//    {
+//        return NULL;
+//    }
+//    int c = fgetc(file);
+//    if(c == EOF || c == '\n')
+//    {
+//        return NULL;
+//    }
+//    int counter = 1;
+//    while (c != '\n' && c != EOF)
+//    {
+//        counter++;
+//        c = fgetc(file);
+//    }
+//    char* str = malloc(sizeof(char) * (counter + 1));
+//    if(str == NULL)
+//    {
+//        return NULL;
+//    }
+//    fseek(file, -(counter + 1), SEEK_CUR);
+//    fgets(str,counter + 1, file);
+//    return str;
+//}
+
 char* readLineFromFile(FILE* file)
 {
-    if(file == NULL)
+    if (file == NULL)
     {
         return NULL;
     }
-    int c = fgetc(file);
-    if(c == EOF || c == '\n')
+
+    int bufferSize = 256;
+    int position = 0;
+    char* buffer = malloc(bufferSize * sizeof(char));
+
+    if (buffer == NULL)
     {
         return NULL;
     }
-    int counter = 0;
-    while (c != '\n' && c != EOF)
+
+    int c;
+    while ((c = fgetc(file)) != EOF && c != '\n')
     {
-        counter++;
-        c = fgetc(file);
+        buffer[position++] = (char)c;
+
+        if (position >= bufferSize)
+        {
+            bufferSize += 256;
+            char* temp = realloc(buffer, bufferSize * sizeof(char));
+            if (temp == NULL)
+            {
+                free(buffer);
+                return NULL;
+            }
+            buffer = temp;
+        }
     }
-    char* str = malloc(sizeof(char) * (counter + 1));
-    if(str == NULL)
+
+    if (position == 0 && c == EOF)
     {
+        free(buffer);
         return NULL;
     }
-    fseek(file, -counter - 2, SEEK_CUR);
-    fgets(str, counter + 1, file);
-    //fseek(file, counter + 1, SEEK_CUR);
-    return str;
+
+    buffer[position] = '\0';
+    return buffer;
 }
+
 
 /**
  *
@@ -377,17 +421,20 @@ Hacker* createHackersArray(FILE* hackers, int *len)
     int* rivalsArr;
     int rivalsLen;
 
-    char* line = NULL;
+    //char* line = NULL;
     for (int i = 0; i < (*len); ++i)
     {
         fscanf(hackers,"%d\n", &id);
-        fscanf(hackers,"%m[^\n]\n", &line);
+        //fscanf(hackers,"%m[^\n]\n", &line);
+        char* line = readLineFromFile(hackers);
         coursesArr = allocateIntsArrayFromLine(line,&coursesLen);
         free(line);
-        fscanf(hackers,"%m[^\n]\n", &line);
+        //fscanf(hackers,"%m[^\n]\n", &line);
+        line = readLineFromFile(hackers);
         friendsArr = allocateIntsArrayFromLine(line,&friendsLen);
         free(line);
-        fscanf(hackers,"%m[^\n]\n", &line);
+//        fscanf(hackers,"%m[^\n]\n", &line);
+        line = readLineFromFile(hackers);
         rivalsArr = allocateIntsArrayFromLine(line,&rivalsLen);
         free(line);
         hackersArr[i] = createHacker(id,coursesArr,coursesLen,friendsArr,friendsLen,rivalsArr,rivalsLen);
@@ -703,7 +750,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     }
 
-    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\temp.txt","w+");
+    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\Tests\\temp.txt","w+");
     if(tempEnrollment == NULL)
     {
         return;
@@ -748,7 +795,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     for (int i = 0; i < sys->hackersLen; ++i)
     {
-        if(sys->hackers[i]->coursesEnrolled <= MIN_COURSES && sys->hackers[i]->coursesLen > 1)
+        if(sys->hackers[i]->coursesEnrolled < MIN_COURSES && sys->hackers[i]->coursesLen > 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
             return;
@@ -762,7 +809,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     copy(tempEnrollment,out);
     fclose(tempEnrollment);
-    remove("temp.txt");
+    remove("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\Tests\\temp.txt");
 }
 
 void stringToUpper(char* str)

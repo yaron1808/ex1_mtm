@@ -55,7 +55,7 @@ int compare(void* a, void* b){
     return 0;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** argv)//TODO: check test 6,8,9,10
 {
     if(argc!=6 && argc!=7)
     {
@@ -75,7 +75,6 @@ int main(int argc, char** argv)
     FILE* hackers = fopen(hackers_file, "r");
     FILE* queues = fopen(queues_file, "r");
     FILE* out = fopen(output_file, "w");
-
 
     if(students == NULL || courses == NULL || hackers == NULL || queues == NULL || out == NULL)
     {

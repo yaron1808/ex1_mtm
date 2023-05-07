@@ -42,18 +42,15 @@ int main(int argc, char** argv)
     char* queues_file = (argc==6) ? argv[4] : argv[5];
     char* output_file = (argc==6) ? argv[5] : argv[6];
 
-
-//   FILE* courses = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\courses.txt", "r");
-//   FILE* students = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\students.txt", "r");
-//   FILE* hackers = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\hackers.txt", "r");
-//   FILE* queues = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\queues.txt", "r");
     FILE* students = fopen(students_file, "r");
     FILE* courses = fopen(courses_file, "r");
     FILE* hackers = fopen(hackers_file, "r");
     FILE* queues = fopen(queues_file, "r");
     FILE* out = fopen(output_file, "w");
 
-    if(students == NULL || courses == NULL || hackers == NULL){
+    if(students == NULL || courses == NULL || hackers == NULL || queues == NULL || out == NULL)
+    {
+        printf("Error opening files\n");
         return 0;
     }
 
@@ -66,7 +63,8 @@ int main(int argc, char** argv)
         setCaseSensitivity(sys, false);
     }
     readEnrollment(sys, queues);
-    hackEnrollment(sys, stdout);
+    hackEnrollment(sys, out);
+
     fclose(students);
     fclose(courses);
     fclose(hackers);

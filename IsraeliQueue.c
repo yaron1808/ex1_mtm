@@ -421,7 +421,7 @@ void addNode(IsraeliQueue queue, Node_t* newNode)
                 if(nodeRival->rivals < RIVAL_QUOTA && isRivals(queue, nodeRival, newNode))
                 {
                     nodeRival->rivals++;
-                    nodeFriend = nodeRival->next;
+                    nodeFriend = nodeRival;
                     break;
                 }
                 nodeRival=nodeRival->next;

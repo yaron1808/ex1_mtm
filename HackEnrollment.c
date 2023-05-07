@@ -5,7 +5,7 @@
 #include "IsraeliQueue.h"
 
 #define ABS(N) (((N)<0)?(-(N)):((N)))
-
+#define CHUNK_SIZE 256
 
 typedef struct Hacker_t* Hacker;
 typedef struct Courses_t* Course;
@@ -94,6 +94,34 @@ int howManySpaces(const char* str)
         }
     }
     return counter;
+}
+
+char* readLineFromFile(FILE* file)
+{
+    if(file == NULL)
+    {
+        return NULL;
+    }
+    int c = fgetc(file);
+    if(c == EOF || c == '\n')
+    {
+        return NULL;
+    }
+    int counter = 0;
+    while (c != '\n' && c != EOF)
+    {
+        counter++;
+        c = fgetc(file);
+    }
+    char* str = malloc(sizeof(char) * (counter + 1));
+    if(str == NULL)
+    {
+        return NULL;
+    }
+    fseek(file, -counter - 2, SEEK_CUR);
+    fgets(str, counter + 1, file);
+    //fseek(file, counter + 1, SEEK_CUR);
+    return str;
 }
 
 /**
@@ -493,7 +521,6 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
         free(id);
         fscanf(queues,"%m[^\n]\n",&line);
     }
-
     return sys;
 }
 
@@ -643,12 +670,13 @@ void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
     }
 }
 
-void copyFile(FILE* src, FILE* dst)
+void copy(FILE* input, FILE* output)
 {
-    char letter;
-    while((letter = fgetc(src)) != EOF)
+    rewind(input); // rewind the file pointer to the beginning (just in case)
+    char buffer[CHUNK_SIZE];
+    while (fgets(buffer, CHUNK_SIZE, input) != NULL)
     {
-        fputc(letter, dst);
+        fputs(buffer, output);
     }
 }
 
@@ -674,7 +702,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     }
 
-    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\temp.txt","w");
+    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\temp.txt","w+");
     if(tempEnrollment == NULL)
     {
         return;
@@ -683,7 +711,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
     for (int i = 0; i < sys->coursesLen; ++i)
     {
         int queueSize = IsraeliQueueSize(sys->courses[i]->queue);
-        if(queueSize == 1)
+        if(queueSize == 0)
         {
             continue;
         }
@@ -703,28 +731,33 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
             fprintf(tempEnrollment, "\n");
         }
     }
-    char* line;
-    int ret = fscanf(tempEnrollment,"%m[^\n]\n",&line);
+
+    rewind(tempEnrollment);
+    char* line = readLineFromFile(tempEnrollment);
     int len;
-    while(line!=NULL && ret!= 0 && ret !=EOF)
+    while(line!=NULL)
     {
         int* id = allocateIntsArrayFromLine(line,&len);
         updateHackerEnrollment(sys,id,len);
         free(id);
         free(line);
-        ret = fscanf(tempEnrollment,"%m[^\n]\n",&line);
+        line = readLineFromFile(tempEnrollment);
     }
 
 
     for (int i = 0; i < sys->hackersLen; ++i)
     {
-        if(sys->hackers[i]->coursesEnrolled <= MIN_COURSES)
+        if(sys->hackers[i]->coursesEnrolled <= MIN_COURSES && sys->hackers[i]->coursesLen > 1)
+        {
+            fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
+        }
+        if(sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
         }
     }
 
-    copyFile(tempEnrollment,out);
+    copy(tempEnrollment,out);
     fclose(tempEnrollment);
     remove("temp.txt");
 }

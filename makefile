@@ -8,10 +8,10 @@ $(EXEC) : $(OBJS)
 	$(CC) $(DEBUG_FLAG) $(OBJS) -o HackEnrollment
 
 IsraeliQueue.o: IsraeliQueue.c IsraeliQueue.h
-	$(CC) -c $(DEBUG_FLAG) $(COMP_FLAG) $*.c
 
 main.o: main.c IsraeliQueue.h HackEnrollment.h
-	$(CC) -c $(DEBUG_FLAG) $(COMP_FLAG) $*.c
+
+HackEnrollment.o: HackEnrollment.c HackEnrollment.h IsraeliQueue.h
 
 clean:
 	rm -f $(OBJS) $(EXEC)

@@ -55,13 +55,7 @@ struct EnrollmentSystem_t{
 //functions declerations
 typedef struct EnrollmentSystem_t EnrollmentSystem_t;
 
-//Student* createStudentsArray(FILE* students);
-//Course* createCoursesArray(FILE* courses);
-//IsraeliQueue* createQueuesArray(FILE* courses);
-//int findHowManyEnters(FILE* file);
-//Student createStudent(char* id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department, char** desiredCourses, char** friendsIds, char** rivalsIds);
-//Hacker * createHackersArray(FILE* hackers);
-//Course createCourse(int courseNumber, int size);
+void destroyHackersArray(Hacker* hackers, int len);
 
 int findHowManyEnters(FILE* file)
 {
@@ -150,6 +144,20 @@ char* readLineFromFile(FILE* file)
  */
 int* allocateIntsArrayFromLine(const char* str,int* len)
 {
+    if(strlen(str) == 0)
+    {
+        int* arr = malloc(sizeof(int));
+        if(arr == NULL)
+        {
+            return NULL;
+        }
+        *len = 0;
+        arr[0] = 0;
+        return arr;
+    }
+    {
+        return NULL;
+    }
     int cnt = 0;
     int ret = 0;
     int val = 0;
@@ -332,7 +340,7 @@ void destroyCoursesArray(Course* courses, int len)
 
 Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int friendsLen, int* rivalsIds, int rivalsLen)
 {
-    if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0 || friendsLen == 0 || rivalsLen == 0)
+    if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0)
     {
         return NULL;
     }
@@ -412,7 +420,11 @@ Hacker* createHackersArray(FILE* hackers, int *len)
         rivalsArr = allocateIntsArrayFromLine(line,&rivalsLen);
         free(line);
         hackersArr[i] = createHacker(id,coursesArr,coursesLen,friendsArr,friendsLen,rivalsArr,rivalsLen);
-
+        if(hackersArr[i] == NULL)
+        {
+            destroyHackersArray(hackersArr,i);
+            return NULL;
+        }
     }
     return hackersArr;
 }
@@ -685,7 +697,7 @@ int findHackerPositionInQueue(IsraeliQueue queue, Hacker hacker)
 void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
 {
     Course currentCourse = findCourseByCourseNum(sys, id[0]);
-    for (int i = 1; i < len && i < currentCourse->courseSize; ++i)
+    for (int i = 1; i < len && i <= currentCourse->courseSize; ++i)
     {
         if(findStudentById(sys,id[i])->hacker!=NULL)
         {
@@ -726,7 +738,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     }
 
-    FILE* tempEnrollment = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\Tests\\temp.txt","w+");
+    FILE* tempEnrollment = fopen("temp.txt","w+");
     if(tempEnrollment == NULL)
     {
         return;
@@ -785,7 +797,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     copy(tempEnrollment,out);
     fclose(tempEnrollment);
-    remove("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\Tests\\temp.txt");
+    remove("temp.txt");
 }
 
 void stringToUpper(char* str)

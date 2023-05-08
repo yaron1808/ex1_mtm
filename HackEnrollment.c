@@ -155,9 +155,7 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
         arr[0] = 0;
         return arr;
     }
-    {
-        return NULL;
-    }
+
     int cnt = 0;
     int ret = 0;
     int val = 0;

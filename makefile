@@ -5,7 +5,7 @@ DEBUG_FLAG = # now empty, assign -g for debug
 COMP_FLAG = t -lm -I/home/mtm/public/2223b/ex1 -Itool -Wall -pedantic-errors -Werror -DNDEBUG
 
 $(EXEC) : $(OBJS)
-	$(CC) $(DEBUG_FLAG) $(OBJS) -o HackEnrollment
+	$(CC) $(DEBUG_FLAG) $(COMP_FLAG) $(OBJS) -o HackEnrollment
 
 IsraeliQueue.o: IsraeliQueue.c IsraeliQueue.h
 

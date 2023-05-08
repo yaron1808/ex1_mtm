@@ -2,7 +2,7 @@ CC = gcc
 OBJS = main.o HackEnrollment.o IsraeliQueue.o
 EXEC = program
 DEBUG_FLAG = # now empty, assign -g for debug
-COMP_FLAG = t -lm -I/home/mtm/public/2223b/ex1 -Itool -Wall -pedantic-errors -Werror -DNDEBUG
+COMP_FLAG = -lm -I/home/mtm/public/2223b/ex1 -Itool -Wall -pedantic-errors -Werror -DNDEBUG
 
 $(EXEC) : $(OBJS)
 	$(CC) $(DEBUG_FLAG) $(COMP_FLAG) $(OBJS) -o HackEnrollment

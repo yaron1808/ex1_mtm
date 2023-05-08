@@ -286,12 +286,12 @@ Student* createStudentsArray(FILE* students, int* len)
     char* lastName;
     char* city;
     char* department;
-    int num;
+    //int num;
 
     for(int i = 0; i<(*len); i++)
     {
-        num = fscanf(students,"%d %d %d",&id,&totalCredits,&GPA);
-        assert(num == 3);
+        fscanf(students,"%d %d %d",&id,&totalCredits,&GPA);
+        //assert(num == 3);
         firstName = readUntilSpaceFromFile(students);
         lastName = readUntilSpaceFromFile(students);
         city = readUntilSpaceFromFile(students);
@@ -353,9 +353,9 @@ Course* createCoursesArray(FILE* courses, int* len)
     {
         int courseNumber;
         int size;
-        int num;
-        num = fscanf(courses, "%d %d", &courseNumber, &size);
-        assert(num==2);
+        //int num;
+        fscanf(courses, "%d %d", &courseNumber, &size);
+        //assert(num==2);
         coursesArray[i] = createCourse(courseNumber, size);
     }
     return coursesArray;

@@ -5,7 +5,7 @@
 #include "IsraeliQueue.h"
 
 #define ABS(N) (((N)<0)?(-(N)):((N)))
-#define CHUNK_SIZE 256
+#define BUFFER_SIZE 256
 
 typedef struct Hacker_t* Hacker;
 typedef struct Courses_t* Course;
@@ -85,7 +85,7 @@ char* readLineFromFile(FILE* file)
         return NULL;
     }
 
-    int bufferSize = 256;
+    int bufferSize = BUFFER_SIZE;
     int position = 0;
     char* buffer = malloc(bufferSize * sizeof(char));
 
@@ -101,7 +101,7 @@ char* readLineFromFile(FILE* file)
 
         if (position >= bufferSize)
         {
-            bufferSize += 256;
+            bufferSize += BUFFER_SIZE;
             char* temp = realloc(buffer, bufferSize * sizeof(char));
             if (temp == NULL)
             {
@@ -129,7 +129,7 @@ char* readUntilSpaceFromFile(FILE* file)
         return NULL;
     }
 
-    int bufferSize = 256;
+    int bufferSize = BUFFER_SIZE;
     int position = 0;
     char* buffer = malloc(bufferSize * sizeof(char));
 
@@ -140,7 +140,7 @@ char* readUntilSpaceFromFile(FILE* file)
     int c = fgetc(file);
     if (c != ' ')
     {
-        fseek(file, -1, SEEK_CUR);
+        ungetc(c, file);
     }
     while ((c = fgetc(file)) != EOF && c != '\n' && c != ' ')
     {
@@ -148,7 +148,7 @@ char* readUntilSpaceFromFile(FILE* file)
 
         if (position >= bufferSize)
         {
-            bufferSize += 256;
+            bufferSize += BUFFER_SIZE;
             char* temp = realloc(buffer, bufferSize * sizeof(char));
             if (temp == NULL)
             {
@@ -190,20 +190,20 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
         return arr;
     }
 
-    int cnt = 0;
-    int ret = 0;
-    int val = 0;
+    int counter = 0;
+    int returnValue = 0;
+    int value = 0;
     int bytesRead;
     const char* str0 = str;
-    ret = sscanf(str,"%d%n",&val, &bytesRead);
+    returnValue = sscanf(str, "%d%n", &value, &bytesRead);
     str+=bytesRead;
-    while(ret != EOF && ret != 0)
+    while(returnValue != EOF && returnValue != 0)
     {
-        cnt++;
-        ret = sscanf(str,"%d%n",&val, &bytesRead);
+        counter++;
+        returnValue = sscanf(str, "%d%n", &value, &bytesRead);
         str += bytesRead;
     }
-    *len = cnt;
+    *len = counter;
     str = str0;
 
     int* arr = malloc(sizeof(int) * (*len));
@@ -224,7 +224,6 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 //functions
 
 
-//TODO: implement destory functions
 
 Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
 {
@@ -286,12 +285,10 @@ Student* createStudentsArray(FILE* students, int* len)
     char* lastName;
     char* city;
     char* department;
-    //int num;
 
     for(int i = 0; i<(*len); i++)
     {
         fscanf(students,"%d %d %d",&id,&totalCredits,&GPA);
-        //assert(num == 3);
         firstName = readUntilSpaceFromFile(students);
         lastName = readUntilSpaceFromFile(students);
         city = readUntilSpaceFromFile(students);
@@ -353,9 +350,7 @@ Course* createCoursesArray(FILE* courses, int* len)
     {
         int courseNumber;
         int size;
-        //int num;
         fscanf(courses, "%d %d", &courseNumber, &size);
-        //assert(num==2);
         coursesArray[i] = createCourse(courseNumber, size);
     }
     return coursesArray;
@@ -439,19 +434,15 @@ Hacker* createHackersArray(FILE* hackers, int *len)
     int* rivalsArr;
     int rivalsLen;
 
-    //char* line = NULL;
     for (int i = 0; i < (*len); ++i)
     {
         fscanf(hackers,"%d\n", &id);
-        //fscanf(hackers,"%m[^\n]\n", &line);
         char* line = readLineFromFile(hackers);
         coursesArr = allocateIntsArrayFromLine(line,&coursesLen);
         free(line);
-        //fscanf(hackers,"%m[^\n]\n", &line);
         line = readLineFromFile(hackers);
         friendsArr = allocateIntsArrayFromLine(line,&friendsLen);
         free(line);
-//        fscanf(hackers,"%m[^\n]\n", &line);
         line = readLineFromFile(hackers);
         rivalsArr = allocateIntsArrayFromLine(line,&rivalsLen);
         free(line);
@@ -562,7 +553,8 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
     FriendshipFunction friendFunctions[] = {NULL};
     for (int i = 0; i < sys->coursesLen; ++i)
     {
-        sys->courses[i]->queue = IsraeliQueueCreate(friendFunctions,compareFunction,FRIENDSHIP_THRESHOLD,RIVALRY_THRESHOLD);
+        sys->courses[i]->queue = IsraeliQueueCreate(friendFunctions,compareFunction,
+                                                    FRIENDSHIP_THRESHOLD,RIVALRY_THRESHOLD);
         if(sys->courses[i]->queue == NULL)
         {
             return NULL;
@@ -570,7 +562,6 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
     }
 
     char* line = NULL;
-    //int ret = fscanf(queues,"%m[^\n]\n",&line);
     line = readLineFromFile(queues);
     while(line!=NULL)
     {
@@ -589,7 +580,6 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
             IsraeliQueueEnqueue(q, findStudentById(sys,id[i]));
         }
         free(id);
-        //fscanf(queues,"%m[^\n]\n",&line);
         line = readLineFromFile(queues);
     }
     return sys;
@@ -741,8 +731,8 @@ void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
 void copy(FILE* input, FILE* output)
 {
     rewind(input); // rewind the file pointer to the beginning (just in case)
-    char buffer[CHUNK_SIZE];
-    while (fgets(buffer, CHUNK_SIZE, input) != NULL)
+    char buffer[BUFFER_SIZE];
+    while (fgets(buffer, BUFFER_SIZE, input) != NULL)
     {
         fputs(buffer, output);
     }
@@ -815,14 +805,8 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
 
     for (int i = 0; i < sys->hackersLen; ++i)
     {
-        if(sys->hackers[i]->coursesEnrolled < MIN_COURSES && sys->hackers[i]->coursesLen > 1)
-        {
-            fprintf(out,"Cannot satisfy constraints for %d\n", sys->hackers[i]->id);
-            fclose(tempEnrollment);
-            remove("temp.txt");
-            return;
-        }
-        if(sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
+        if((sys->hackers[i]->coursesEnrolled < MIN_COURSES && sys->hackers[i]->coursesLen > 1)
+        || sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d\n", sys->hackers[i]->id);
             fclose(tempEnrollment);

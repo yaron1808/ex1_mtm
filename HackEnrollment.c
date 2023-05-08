@@ -806,7 +806,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
     for (int i = 0; i < sys->hackersLen; ++i)
     {
         if((sys->hackers[i]->coursesEnrolled < MIN_COURSES && sys->hackers[i]->coursesLen > 1)
-        || sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
+        || (sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1))
         {
             fprintf(out,"Cannot satisfy constraints for %d\n", sys->hackers[i]->id);
             fclose(tempEnrollment);

@@ -242,9 +242,9 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
 {
     if(firstName == NULL || lastName == NULL || city == NULL || department == NULL)
-//    {
-//        return NULL;
-//    }
+    {
+        return NULL;
+    }
     Student student = malloc(sizeof(*student));
     if(student == NULL)
     {
@@ -303,8 +303,12 @@ Student* createStudentsArray(FILE* students, int* len)
 
     for(int i = 0; i<(*len); i++)
     {
-        num = fscanf(students,"%d %d %d %ms %ms %ms %ms",&id,&totalCredits,&GPA,&firstName,&lastName,&city,&department); // TODO check if it works
-        assert(num == 7);
+        num = fscanf(students,"%d %d %d",&id,&totalCredits,&GPA);
+        assert(num == 3);
+        firstName = readUntilSpaceFromFile(students);
+        lastName = readUntilSpaceFromFile(students);
+        city = readUntilSpaceFromFile(students);
+        department = readUntilSpaceFromFile(students);
         studentsArr[i] = createStudent(id,totalCredits,GPA,firstName,lastName,city,department);
         if(studentsArr[i] == NULL)
         {

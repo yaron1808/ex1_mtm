@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
-
 #include "IsraeliQueue.h"
 
 
@@ -607,38 +606,3 @@ void IsraeliQueueInsertAfterNode(IsraeliQueue queue, Node_t* friend, Node_t* nod
 
 }
 
-void printIntObjectsOfQueue (IsraeliQueue queue)//remove
-{
-    Node_t* currentNode = queue -> head;
-    while (currentNode)
-    {
-        printf("%d ,", *(int*)currentNode->data);
-        currentNode = currentNode->next;
-    }
-}
-
-void printFriend_th (IsraeliQueue queue) //remove
-{
-    printf("the friend_th %d\n", queue ->friendship_th);
-    printf("the rivalry_th %d\n", queue ->rivalry_th);
-
-}
-void printSizeOfFriendFunction (IsraeliQueue queue) //remove
-{
-
-    int size = friendsArraySize(queue->friendsFunctions);
-    printf("friends array size is %d\n", size);
-}
-bool checkingIfThisIsTheRightArray (IsraeliQueue queue, FriendshipFunction* friendsArray)
-{
-    int i = 0;
-    while(friendsArray[i])
-    {
-        if(friendsArray[i] != queue ->friendsFunctions[i])
-        {
-            return false;
-        }
-        i++;
-    }
-    return true;
-}

@@ -84,6 +84,10 @@ int main(int argc, char** argv)//TODO: check test 6,8,9,10
 
     EnrollmentSystem sys = createEnrollment(students, courses, hackers);
     readEnrollment(sys, queues);
+    if(strcmp(flag, "-i") == 0)
+    {
+        setCaseSensitivity(sys, true);
+    }
     hackEnrollment(sys, out);
     fclose(students);
     fclose(courses);
@@ -91,17 +95,3 @@ int main(int argc, char** argv)//TODO: check test 6,8,9,10
     fclose(queues);
     return 0;
 }
-//FILE* courses = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\courses.txt", "r");
-//FILE* students = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\students.txt", "r");
-//FILE* hackers = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\hackers.txt", "r");
-//FILE* queues = fopen("C:\\Users\\lasko\\CLionProjects\\ex1_mtm\\ExampleTest\\queues.txt", "r");
-
-//if(students == NULL || courses == NULL || hackers == NULL){
-//return 0;
-//}
-//EnrollmentSystem sys = createEnrollment(students, courses, hackers);
-//readEnrollment(sys, queues);
-//fclose(students);
-//fclose(courses);
-//fclose(hackers);
-//fclose(queues);

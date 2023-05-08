@@ -96,32 +96,6 @@ int howManySpaces(const char* str)
     return counter;
 }
 
-//char* readLineFromFile(FILE* file)
-//{
-//    if(file == NULL)
-//    {
-//        return NULL;
-//    }
-//    int c = fgetc(file);
-//    if(c == EOF || c == '\n')
-//    {
-//        return NULL;
-//    }
-//    int counter = 1;
-//    while (c != '\n' && c != EOF)
-//    {
-//        counter++;
-//        c = fgetc(file);
-//    }
-//    char* str = malloc(sizeof(char) * (counter + 1));
-//    if(str == NULL)
-//    {
-//        return NULL;
-//    }
-//    fseek(file, -(counter + 1), SEEK_CUR);
-//    fgets(str,counter + 1, file);
-//    return str;
-//}
 
 char* readLineFromFile(FILE* file)
 {
@@ -548,8 +522,9 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
     }
 
     char* line = NULL;
-    int ret = fscanf(queues,"%m[^\n]\n",&line);
-    while(line!=NULL && ret!= 0 && ret !=EOF)
+    //int ret = fscanf(queues,"%m[^\n]\n",&line);
+    line = readLineFromFile(queues);
+    while(line!=NULL)
     {
         int len;
         int* id = allocateIntsArrayFromLine(line,&len);
@@ -566,7 +541,8 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
             IsraeliQueueEnqueue(q, findStudentById(sys,id[i]));
         }
         free(id);
-        fscanf(queues,"%m[^\n]\n",&line);
+        //fscanf(queues,"%m[^\n]\n",&line);
+        line = readLineFromFile(queues);
     }
     return sys;
 }

@@ -135,6 +135,53 @@ char* readLineFromFile(FILE* file)
     return buffer;
 }
 
+char* readUntilSpaceFromFile(FILE* file)
+{
+    if (file == NULL)
+    {
+        return NULL;
+    }
+
+    int bufferSize = 256;
+    int position = 0;
+    char* buffer = malloc(bufferSize * sizeof(char));
+
+    if (buffer == NULL)
+    {
+        return NULL;
+    }
+    int c = fgetc(file);
+    if (c != ' ')
+    {
+        fseek(file, -1, SEEK_CUR);
+    }
+    while ((c = fgetc(file)) != EOF && c != '\n' && c != ' ')
+    {
+        buffer[position++] = (char)c;
+
+        if (position >= bufferSize)
+        {
+            bufferSize += 256;
+            char* temp = realloc(buffer, bufferSize * sizeof(char));
+            if (temp == NULL)
+            {
+                free(buffer);
+                return NULL;
+            }
+            buffer = temp;
+        }
+    }
+
+    if (position == 0 && c == EOF)
+    {
+        free(buffer);
+        return NULL;
+    }
+
+    buffer[position] = '\0';
+    return buffer;
+}
+
 
 /**
  *
@@ -195,9 +242,9 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
 {
     if(firstName == NULL || lastName == NULL || city == NULL || department == NULL)
-    {
-        return NULL;
-    }
+//    {
+//        return NULL;
+//    }
     Student student = malloc(sizeof(*student));
     if(student == NULL)
     {

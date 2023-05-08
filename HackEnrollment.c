@@ -819,12 +819,14 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
             fclose(tempEnrollment);
+            remove("temp.txt");
             return;
         }
         if(sys->hackers[i]->coursesEnrolled == 0 && sys->hackers[i]->coursesLen == 1)
         {
             fprintf(out,"Cannot satisfy constraints for %d", sys->hackers[i]->id);
             fclose(tempEnrollment);
+            remove("temp.txt");
             return;
         }
     }

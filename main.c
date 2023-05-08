@@ -10,6 +10,17 @@ int main(int argc, char** argv)
         printf("Usage: %s [-i] <students file> <courses file> <hackers file> <queues file> <output file> \n", argv[0]);
         return 1;
     }
+    if(argv == NULL)
+    {
+        printf("Error allocating memory\n");
+        return 1;
+    }
+    if(argc==7 && strcmp(argv[1], "-i") != 0)
+    {
+        printf("Usage: %s [-i] <students file> <courses file> <hackers file> <queues file> <output file> \n", argv[0]);
+        return 1;
+    }
+
     char* flag = argv[1];
 
     char* students_file = (argc==6) ? argv[1] : argv[2];

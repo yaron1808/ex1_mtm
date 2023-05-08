@@ -25,4 +25,7 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out);
 
 void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive);
 
+void destroyEnrollment(EnrollmentSystem sys);
+
+
 #endif //HACKENROLLMENT_H

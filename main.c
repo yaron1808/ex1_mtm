@@ -93,5 +93,7 @@ int main(int argc, char** argv)//TODO: check test 6,8,9,10
     fclose(courses);
     fclose(hackers);
     fclose(queues);
+    fclose(out);
+    destroyEnrollment(sys);
     return 0;
 }

@@ -874,3 +874,17 @@ void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive)
         }
     }
 }
+
+void destroyEnrollment(EnrollmentSystem sys)
+{
+    if(sys == NULL)
+    {
+        return;
+    }
+
+    destroyStudentsArray(sys->students,sys->studentsLen);
+    destroyCoursesArray(sys->courses,sys->coursesLen);
+    destroyHackersArray(sys->hackers,sys->hackersLen);
+    free(sys);
+
+}

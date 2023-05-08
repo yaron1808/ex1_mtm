@@ -77,19 +77,6 @@ int findHowManyEnters(FILE* file)
     return counter;
 }
 
-int howManySpaces(const char* str)
-{
-    int counter = 0;
-    for(int i = 0; str[i] != '\0'; i++)
-    {
-        if(str[i] == ' ')
-        {
-            counter++;
-        }
-    }
-    return counter;
-}
-
 
 char* readLineFromFile(FILE* file)
 {
@@ -738,10 +725,6 @@ bool IsInArray(int* arr, int len, int num)
     return false;
 }
 
-int findHackerPositionInQueue(IsraeliQueue queue, Hacker hacker)
-{
-
-}
 
 void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
 {

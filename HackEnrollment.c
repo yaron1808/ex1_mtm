@@ -57,6 +57,11 @@ typedef struct EnrollmentSystem_t EnrollmentSystem_t;
 
 void destroyHackersArray(Hacker* hackers, int len);
 
+/**
+ * this function check how many enters in the file
+ * @param file file to check
+ * @return number of enters
+ */
 int findHowManyEnters(FILE* file)
 {
     if(file == NULL)
@@ -77,7 +82,11 @@ int findHowManyEnters(FILE* file)
     return counter;
 }
 
-
+/**
+ * this function read line from file
+ * @param file file to read from
+ * @return line from file
+ */
 char* readLineFromFile(FILE* file)
 {
     if (file == NULL)
@@ -121,6 +130,12 @@ char* readLineFromFile(FILE* file)
     buffer[position] = '\0';
     return buffer;
 }
+
+/**
+ * this function read line from file until space
+ * @param file file to read from
+ * @return word from file
+ */
 
 char* readUntilSpaceFromFile(FILE* file)
 {
@@ -171,10 +186,10 @@ char* readUntilSpaceFromFile(FILE* file)
 
 
 /**
- *
- * @param str
- * @param len
- * @return
+ * this function allocate array of ints from string
+ * @param str string to allocate from
+ * @param len update the length of the array
+ * @return pointer to the array
  */
 int* allocateIntsArrayFromLine(const char* str,int* len)
 {
@@ -224,6 +239,17 @@ int* allocateIntsArrayFromLine(const char* str,int* len)
 //functions
 
 
+/**
+ * this function create student
+ * @param id id of the student
+ * @param totalCredits total credits of the student
+ * @param GPA GPA of the student
+ * @param firstName first name of the student
+ * @param lastName last name of the student
+ * @param city city of the student
+ * @param department department of the student
+ * @return pointer to the student
+ */
 
 Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* lastName, char* city, char* department)
 {
@@ -247,7 +273,10 @@ Student createStudent(int id, int totalCredits, int GPA, char* firstName, char* 
 
     return student;
 }
-
+/**
+ * this function destroy student and deallocate all the memory
+ * @param student student to destroy
+ */
 void destroyStudent(Student student)
 {
     if(student == NULL)
@@ -264,7 +293,12 @@ void destroyStudent(Student student)
     }
     free(student);
 }
-
+/**
+ * this function creates array of students from file
+ * @param students file to read from
+ * @param len len of the array
+ * @return pointer to the array
+ */
 Student* createStudentsArray(FILE* students, int* len)
 {
     *len = findHowManyEnters(students);
@@ -315,6 +349,12 @@ void destroyStudentsArray(Student* students, int len)
     free(students);
 }
 
+/**
+ * this function create course
+ * @param courseNumber the number of the course
+ * @param size course max size
+ * @return
+ */
 Course createCourse(int courseNumber, int size)
 {
     Course course = malloc(sizeof(*course));
@@ -328,6 +368,10 @@ Course createCourse(int courseNumber, int size)
     return course;
 }
 
+/**
+ * this function destroy course and deallocate all the memory
+ * @param course course to destroy
+ */
 void destroyCourse(Course course)
 {
     if(course == NULL)
@@ -337,7 +381,12 @@ void destroyCourse(Course course)
     IsraeliQueueDestroy(course->queue);
     free(course);
 }
-
+/**
+ * this function creates array of courses from file
+ * @param courses file to read from
+ * @param len len of the array
+ * @return pointer to the array
+ */
 Course* createCoursesArray(FILE* courses, int* len)
 {
     *len = findHowManyEnters(courses);
@@ -352,10 +401,19 @@ Course* createCoursesArray(FILE* courses, int* len)
         int size;
         fscanf(courses, "%d %d", &courseNumber, &size);
         coursesArray[i] = createCourse(courseNumber, size);
+        if(coursesArray[i] == NULL)
+        {
+            return NULL;
+        }
     }
     return coursesArray;
 }
 
+/**
+ * this function destroy courses array and deallocate all the memory
+ * @param courses courses array to destroy
+ * @param len len of the array
+ */
 void destroyCoursesArray(Course* courses, int len)
 {
     if(courses == NULL)
@@ -369,6 +427,17 @@ void destroyCoursesArray(Course* courses, int len)
     free(courses);
 }
 
+/**
+ * this function create hacker
+ * @param id id of the hacker
+ * @param courses array of courses the hacker is enrolled to
+ * @param coursesLen len of the courses array
+ * @param friendsIds array of friends ids
+ * @param friendsLen len of the friends array
+ * @param rivalsIds array of rivals ids
+ * @param rivalsLen len of the rivals array
+ * @return pointer to the hacker
+ */
 Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int friendsLen, int* rivalsIds, int rivalsLen)
 {
     if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0)
@@ -394,6 +463,10 @@ Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int f
     return hacker;
 }
 
+/**
+ * this function destroy hacker and deallocate all the memory
+ * @param hacker hacker to destroy
+ */
 void destroyHacker(Hacker hacker)
 {
     if(hacker == NULL)
@@ -409,6 +482,12 @@ void destroyHacker(Hacker hacker)
     }
     free(hacker);
 }
+/**
+ * this function creates array of hackers from file
+ * @param hackers file to read from
+ * @param len len of the array
+ * @return pointer to the array
+ */
 
 Hacker* createHackersArray(FILE* hackers, int *len)
 {
@@ -456,6 +535,12 @@ Hacker* createHackersArray(FILE* hackers, int *len)
     return hackersArr;
 }
 
+/**
+ * this function destroy hackers array and deallocate all the memory
+ * @param hackers hackers array to destroy
+ * @param len len of the array
+ */
+
 void destroyHackersArray(Hacker* hackers, int len)
 {
     if(hackers == NULL)
@@ -469,6 +554,13 @@ void destroyHackersArray(Hacker* hackers, int len)
     free(hackers);
 }
 
+/**
+ * this function link each hacker to his student and vice versa
+ * @param hackersArr hackers array
+ * @param hackerLen hackers array len
+ * @param studentsArr students array
+ * @param studentsLen students array len
+ */
 void linkHackerToStudent(Hacker* hackersArr,int hackerLen, Student* studentsArr, int studentsLen)
 {
     int studentIndex = 0;
@@ -487,6 +579,13 @@ void linkHackerToStudent(Hacker* hackersArr,int hackerLen, Student* studentsArr,
     }
 }
 
+/**
+ * this function create enrollment system
+ * @param students students file
+ * @param courses courses file
+ * @param hackers hackers file
+ * @return pointer to the new enrollment system
+ */
 EnrollmentSystem createEnrollment(FILE* students, FILE* courses, FILE* hackers)
 {
     if(students == NULL || courses == NULL || hackers == NULL)
@@ -520,6 +619,12 @@ int compareFunction(void* p1, void* p2)
     return (int)(p1==p2);
 }
 
+/**
+ * this function find course by course number
+ * @param sys enrollment system to search in
+ * @param courseNum course number to search
+ * @return pointer to the course
+ */
 Course findCourseByCourseNum(EnrollmentSystem sys, int courseNum)
 {
     for (int i = 0; i < sys->coursesLen; ++i)
@@ -532,6 +637,12 @@ Course findCourseByCourseNum(EnrollmentSystem sys, int courseNum)
     return NULL;
 }
 
+/**
+ * this function find student by id
+ * @param sys enrollment system to search in
+ * @param id id to search
+ * @return pointer to the student
+ */
 Student findStudentById(EnrollmentSystem sys, int id)
 {
     for (int i = 0; i < sys->studentsLen; ++i)
@@ -544,6 +655,12 @@ Student findStudentById(EnrollmentSystem sys, int id)
     return NULL;
 }
 
+/**
+ * this function read enrollment from file and update the enrollment system
+ * @param sys enrollment system to read to
+ * @param queues file to read from
+ * @return pointer to the updated enrollment system
+ */
 EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
 {
     if(sys ==NULL || queues == NULL)
@@ -587,12 +704,24 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
 
 
 
-
+/**
+ *
+ * @param id1 id of student 1
+ * @param id2 id of student 2
+ * @return absolute value of the difference between the ids
+ */
 int IdsDiff(int id1, int id2)
 {
     return ABS(id1-id2);
 }
 
+/**
+ * this function calculate the friendship between two students by their ids
+ * when at least one of them is a hacker
+ * @param item1 student 1
+ * @param item2 student 2
+ * @return id difference
+ */
 int friendshipFunc3(void* item1, void* item2)
 {
     Student student1 = (Student)item1;
@@ -605,6 +734,14 @@ int friendshipFunc3(void* item1, void* item2)
 
 }
 
+/**
+ * this function calculate the friendship between two students by their names
+ * @param firstName1 first name of student 1
+ * @param firstName2 first name of student 2
+ * @param lastName1 last name of student 1
+ * @param lastName2 last name of student 2
+ * @return absolute value of the difference between the names
+ */
 int nameDiff(const char* firstName1, const char* firstName2, const char* lastName1, const char* lastName2)
 {
     int firstNameDiff = 0;
@@ -649,6 +786,13 @@ int nameDiff(const char* firstName1, const char* firstName2, const char* lastNam
     return firstNameDiff+lastNameDiff;
 }
 
+/**
+ * this function calculate the friendship between two students by their names
+ * when at least one of them is a hacker
+ * @param item1 student 1
+ * @param item2 student 2
+ * @return name difference
+ */
 int friendshipFunc2(void* item1, void* item2)
 {
     Student student1 = (Student)item1;
@@ -660,6 +804,12 @@ int friendshipFunc2(void* item1, void* item2)
     return nameDiff(student1->firstName,student2->firstName,student1->lastName,student2->lastName);
 }
 
+/**
+ * this function indicate the friendship between student and hacker
+ * @param student student to check
+ * @param hacker hacker to check
+ * @return trinary value of the friendship
+ */
 int friendShipHackerStudent(Student student, Hacker hacker)
 {
     for (int i = 0; i < hacker->friendsLen; ++i)
@@ -680,6 +830,12 @@ int friendShipHackerStudent(Student student, Hacker hacker)
     return NO_RELATION;
 }
 
+/**
+ * this function indicate the friendship between two students
+ * @param item1 student 1
+ * @param item2 student 2
+ * @return trinary value of the friendship
+ */
 int friendshipFunc1(void* item1, void* item2)
 {
     Student student1 = (Student)item1;
@@ -715,7 +871,12 @@ bool IsInArray(int* arr, int len, int num)
     return false;
 }
 
-
+/**
+ * this function update the number of courses enrolled for each hacker
+ * @param sys enrollment system to update
+ * @param id array of ids of students enrolled to the course
+ * @param len length of the array
+ */
 void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
 {
     Course currentCourse = findCourseByCourseNum(sys, id[0]);
@@ -728,6 +889,11 @@ void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
     }
 }
 
+/**
+ * this function copy the content of one file to another
+ * @param input input file
+ * @param output output file
+ */
 void copy(FILE* input, FILE* output)
 {
     rewind(input); // rewind the file pointer to the beginning (just in case)
@@ -738,6 +904,11 @@ void copy(FILE* input, FILE* output)
     }
 }
 
+/**
+ * this function hack the enrollment system
+ * @param sys enrollment system to hack
+ * @param out output file
+ */
 void hackEnrollment(EnrollmentSystem sys, FILE* out)
 {
     if(sys == NULL || out == NULL)
@@ -820,6 +991,10 @@ void hackEnrollment(EnrollmentSystem sys, FILE* out)
     remove("temp.txt");
 }
 
+/**
+ * this function convert a string to upper case
+ * @param str string to convert
+ */
 void stringToUpper(char* str)
 {
     int i = 0;
@@ -830,6 +1005,11 @@ void stringToUpper(char* str)
     }
 }
 
+/**
+ * this function set the case sensitivity of the system
+ * @param sys enrollment system to update
+ * @param caseSensitive true if case sensitive, false otherwise
+ */
 void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive)
 {
     if(sys == NULL)
@@ -846,6 +1026,10 @@ void setCaseSensitivity(EnrollmentSystem sys, bool caseSensitive)
     }
 }
 
+/**
+ * this function destroy the enrollment system and deallocate all the memory
+ * @param sys enrollment system to destroy
+ */
 void destroyEnrollment(EnrollmentSystem sys)
 {
     if(sys == NULL)

@@ -5,7 +5,7 @@
 #include "IsraeliQueue.h"
 
 #define ABS(N) (((N)<0)?(-(N)):((N)))
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 typedef struct Hacker_t* Hacker;
 typedef struct Courses_t* Course;
@@ -131,6 +131,7 @@ char* readLineFromFile(FILE* file)
     return buffer;
 }
 
+
 /**
  * this function read line from file until space
  * @param file file to read from
@@ -193,7 +194,7 @@ char* readUntilSpaceFromFile(FILE* file)
  */
 int* allocateIntsArrayFromLine(const char* str,int* len)
 {
-    if(strlen(str) == 0)
+    if(str == NULL || strlen(str) == 0)
     {
         int* arr = malloc(sizeof(int));
         if(arr == NULL)
@@ -515,8 +516,10 @@ Hacker* createHackersArray(FILE* hackers, int *len)
 
     for (int i = 0; i < (*len); ++i)
     {
-        fscanf(hackers,"%d\n", &id);
         char* line = readLineFromFile(hackers);
+        sscanf(line,"%d",&id);
+        free(line);
+        line = readLineFromFile(hackers);
         coursesArr = allocateIntsArrayFromLine(line,&coursesLen);
         free(line);
         line = readLineFromFile(hackers);
@@ -674,6 +677,7 @@ EnrollmentSystem readEnrollment(EnrollmentSystem sys, FILE* queues)
                                                     FRIENDSHIP_THRESHOLD,RIVALRY_THRESHOLD);
         if(sys->courses[i]->queue == NULL)
         {
+            sys->coursesLen = i;
             return NULL;
         }
     }

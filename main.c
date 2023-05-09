@@ -7,17 +7,17 @@ int main(int argc, char** argv)
     if(argc!=6 && argc!=7)
     {
         printf("Usage: %s [-i] <students file> <courses file> <hackers file> <queues file> <output file> \n", argv[0]);
-        return 1;
+        return 0;
     }
     if(argv == NULL)
     {
         printf("Error allocating memory\n");
-        return 1;
+        return 0;
     }
     if(argc==7 && strcmp(argv[1], "-i") != 0)
     {
         printf("Usage: %s [-i] <students file> <courses file> <hackers file> <queues file> <output file> \n", argv[0]);
-        return 1;
+        return 0;
     }
 
     char* flag = argv[1];
@@ -41,12 +41,15 @@ int main(int argc, char** argv)
     }
 
     EnrollmentSystem sys = createEnrollment(students, courses, hackers);
-    readEnrollment(sys, queues);
-    if(strcmp(flag, "-i") == 0)
+    if(readEnrollment(sys, queues) != NULL)
     {
-        setCaseSensitivity(sys, true);
+        if (strcmp(flag, "-i") == 0)
+        {
+            setCaseSensitivity(sys, true);
+        }
+
+        hackEnrollment(sys, out);
     }
-    hackEnrollment(sys, out);
     fclose(students);
     fclose(courses);
     fclose(hackers);

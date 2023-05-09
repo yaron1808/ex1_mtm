@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "IsraeliQueue.h"
 #include "HackEnrollment.h"
 
 int main(int argc, char** argv)

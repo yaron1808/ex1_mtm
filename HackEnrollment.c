@@ -34,6 +34,7 @@ struct Hacker_t
     int* rivalsIds;
     int rivalsLen;
     int coursesEnrolled;
+    bool isEnrolled;
 };
 
 struct Courses_t
@@ -441,7 +442,7 @@ void destroyCoursesArray(Course* courses, int len)
  */
 Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int friendsLen, int* rivalsIds, int rivalsLen)
 {
-    if(courses == NULL || friendsIds == NULL || rivalsIds == NULL || coursesLen == 0)
+    if(courses == NULL || friendsIds == NULL || rivalsIds == NULL)
     {
         return NULL;
     }
@@ -461,6 +462,7 @@ Hacker createHacker(int id, int* courses, int coursesLen, int* friendsIds, int f
     hacker->rivalsLen = rivalsLen;
     hacker->coursesEnrolled = 0;
     hacker->student = NULL;
+    hacker->isEnrolled = false;
     return hacker;
 }
 
@@ -886,10 +888,16 @@ void updateHackerEnrollment(EnrollmentSystem sys, int* id, int len)
     Course currentCourse = findCourseByCourseNum(sys, id[0]);
     for (int i = 1; i < len && i <= currentCourse->courseSize; ++i)
     {
-        if(findStudentById(sys,id[i])->hacker!=NULL)
+        Student student = findStudentById(sys,id[i]);
+        if(student->hacker!=NULL && !(student->hacker->isEnrolled))
         {
-            findStudentById(sys,id[i])->hacker->coursesEnrolled++;
+            student->hacker->coursesEnrolled++;
+            student->hacker->isEnrolled = true;
         }
+    }
+    for (int i = 0; i < sys->hackersLen; ++i)
+    {
+        sys->hackers[i]->isEnrolled = false;
     }
 }
 
